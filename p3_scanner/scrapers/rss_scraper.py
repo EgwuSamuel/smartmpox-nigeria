@@ -28,6 +28,24 @@ FEEDS = [
         "priority": "high",
     },
     {
+        "name": "WHO DON — Outbreak Alerts (specific)",
+        "url":  "https://www.who.int/feeds/entity/csr/don/en/rss.xml",
+        "platform": "who",
+        "priority": "critical",
+    },
+    {
+        "name": "Africa CDC Health Alerts",
+        "url":  "https://africacdc.org/feed/",
+        "platform": "rss_news",
+        "priority": "high",
+    },
+    {
+        "name": "ECDC Surveillance Atlas",
+        "url":  "https://www.ecdc.europa.eu/en/rss.xml",
+        "platform": "rss_news",
+        "priority": "medium",
+    },
+    {
         "name": "HealthMap Mpox",
         "url":  "https://healthmap.org/rss/mpox.rss",
         "platform": "rss_news",

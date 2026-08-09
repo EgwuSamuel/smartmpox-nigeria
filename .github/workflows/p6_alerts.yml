@@ -26,9 +26,10 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install psycopg2-binary>=2.9 python-dotenv>=1.0
+        run: pip install psycopg2-binary>=2.9 python-dotenv>=1.0 sentry-sdk>=2.0
 
       - name: Run alert engine
         run: python alert_engine.py
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SENTRY_DSN:   ${{ secrets.SENTRY_DSN }}

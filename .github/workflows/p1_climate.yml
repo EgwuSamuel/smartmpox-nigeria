@@ -1,13 +1,13 @@
-name: P3 Social Media Scanner
+name: P1 Climate Data (Open-Meteo)
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # daily at 06:00 UTC
-  workflow_dispatch:        # allows manual trigger from GitHub UI
+    - cron: '0 7 * * 1'   # every Monday 07:00 UTC — after P3 scanner (06:00)
+  workflow_dispatch:        # manual trigger from GitHub UI
 
 jobs:
-  scan:
-    name: Scrape & store mpox signals
+  climate:
+    name: Fetch weekly climate → climate_weekly
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -25,15 +25,13 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install \
-            feedparser>=6.0 \
             requests>=2.32 \
             psycopg2-binary>=2.9 \
             python-dotenv>=1.0 \
-            langdetect>=1.0 \
             sentry-sdk>=2.0
 
-      - name: Run P3 scanner (RSS, mpox-relevant only)
-        run: python p3_scanner/pipeline.py --rss-only --mpox-only
+      - name: Fetch current-year climate (all 37 states)
+        run: python p1_warehouse/etl/openmeteo_climate_etl.py --year $(date +%Y)
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SENTRY_DSN:   ${{ secrets.SENTRY_DSN }}
+          DATABASE_URL:  ${{ secrets.DATABASE_URL }}
+          SENTRY_DSN:    ${{ secrets.SENTRY_DSN }}

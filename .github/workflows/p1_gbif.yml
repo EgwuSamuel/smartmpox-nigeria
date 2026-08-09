@@ -1,15 +1,15 @@
-name: P3 Social Media Scanner
+name: P1 GBIF Rodent Data
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # daily at 06:00 UTC
-  workflow_dispatch:        # allows manual trigger from GitHub UI
+    - cron: '0 8 1 * *'   # 1st of every month at 08:00 UTC
+  workflow_dispatch:        # manual trigger from GitHub UI
 
 jobs:
-  scan:
-    name: Scrape & store mpox signals
+  gbif:
+    name: Refresh rodent occurrence → habitat_suitability
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
 
     steps:
       - name: Checkout repository
@@ -25,15 +25,13 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install \
-            feedparser>=6.0 \
             requests>=2.32 \
             psycopg2-binary>=2.9 \
             python-dotenv>=1.0 \
-            langdetect>=1.0 \
             sentry-sdk>=2.0
 
-      - name: Run P3 scanner (RSS, mpox-relevant only)
-        run: python p3_scanner/pipeline.py --rss-only --mpox-only
+      - name: Fetch GBIF rodent occurrence records
+        run: python p1_warehouse/etl/gbif_rodent_etl.py
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          SENTRY_DSN:   ${{ secrets.SENTRY_DSN }}
+          DATABASE_URL:  ${{ secrets.DATABASE_URL }}
+          SENTRY_DSN:    ${{ secrets.SENTRY_DSN }}

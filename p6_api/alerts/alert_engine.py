@@ -16,6 +16,16 @@ import psycopg2
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
+# Sentry — activated only when SENTRY_DSN env var is set
+try:
+    import sentry_sdk
+    _dsn = os.getenv("SENTRY_DSN")
+    if _dsn:
+        sentry_sdk.init(dsn=_dsn, traces_sample_rate=0.1)
+        print("[Sentry] Initialised.")
+except ImportError:
+    pass
+
 from border_states import (
     BORDER_COUNTRIES, STATE_TO_COUNTRIES, RECOMMENDED_ACTIONS,
     NATIONAL_ADVISORY_THRESHOLD,
