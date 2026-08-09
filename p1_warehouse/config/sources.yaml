@@ -1,0 +1,123 @@
+# Data source registry — mirrors ref_data_sources table
+# Each entry is inserted on first ETL run
+
+sources:
+  - code: NCDC_SITREP
+    name: "NCDC Weekly Situation Reports"
+    url: "https://ncdc.gov.ng/diseases/sitreps"
+    licence: "Public"
+    update_frequency: "weekly"
+    requires_auth: false
+    notes: "PDF sitreps scraped with pdfplumber. State-level aggregate counts."
+
+  - code: OWID
+    name: "Our World in Data — Mpox Dataset"
+    url: "https://raw.githubusercontent.com/owid/monkeypox/main/owid-monkeypox-data.csv"
+    licence: "MIT"
+    update_frequency: "daily"
+    requires_auth: false
+    notes: "Direct CSV. Best for 2022-present. Cross-validates NCDC sitrep totals."
+
+  - code: GLOBAL_HEALTH
+    name: "Global.health Mpox Linelist"
+    url: "https://global.health/pathogens/mpox"
+    licence: "CC-BY"
+    update_frequency: "weekly"
+    requires_auth: false
+    notes: "Individual case records with demographics. Primary source for ML training."
+
+  - code: WHO
+    name: "WHO Mpox Data"
+    url: "https://www.who.int/emergencies/diseases/mpox"
+    licence: "Public"
+    update_frequency: "weekly"
+    requires_auth: false
+    notes: "Weekly country-level counts. Downloadable CSV."
+
+  - code: YINKA_2019
+    name: "Yinka-Ogunleye et al. 2019 Supplementary"
+    url: "https://doi.org/10.1016/S1473-3099(19)30220-8"
+    licence: "Open Access"
+    update_frequency: "static"
+    requires_auth: false
+    notes: "122 confirmed Nigeria cases 2017-18. Manually extracted from paper supplement."
+
+  - code: ERA5
+    name: "Copernicus ERA5 Climate Data"
+    url: "https://cds.climate.copernicus.eu"
+    licence: "Copernicus"
+    update_frequency: "monthly"
+    requires_auth: true
+    notes: "Temperature, rainfall, humidity. Requires free CDS account + API key."
+
+  - code: MODIS_NDVI
+    name: "NASA MODIS NDVI"
+    url: "https://earthdata.nasa.gov"
+    licence: "Public"
+    update_frequency: "monthly"
+    requires_auth: true
+    notes: "MOD13Q1 250m NDVI. Requires free NASA Earthdata account."
+
+  - code: GBIF
+    name: "GBIF Rodent Occurrence Records"
+    url: "https://www.gbif.org"
+    licence: "CC-BY"
+    update_frequency: "monthly"
+    requires_auth: false
+    notes: "Cricetomys gambianus + Funisciurus spp. occurrence records in Nigeria."
+
+  - code: GRID3
+    name: "GRID3 Nigeria LGA Boundaries"
+    url: "https://grid3.org/data"
+    licence: "Open"
+    update_frequency: "static"
+    requires_auth: false
+    notes: "All 774 LGA boundary shapefiles. Definitive Nigeria spatial reference."
+
+  - code: WORLDPOP
+    name: "WorldPop Nigeria Gridded Population"
+    url: "https://www.worldpop.org"
+    licence: "CC-BY"
+    update_frequency: "annual"
+    requires_auth: false
+    notes: "100m resolution population estimates, age/sex disaggregated."
+
+  - code: OSM
+    name: "OpenStreetMap Nigeria"
+    url: "https://download.geofabrik.de/africa/nigeria.html"
+    licence: "ODbL"
+    update_frequency: "monthly"
+    requires_auth: false
+    notes: "Road network, market locations, border crossings."
+
+  - code: GFW
+    name: "Global Forest Watch Nigeria"
+    url: "https://www.globalforestwatch.org"
+    licence: "CC-BY"
+    update_frequency: "annual"
+    requires_auth: false
+    notes: "Annual tree cover loss by LGA, deforestation alerts."
+
+  - code: TWITTER
+    name: "Twitter/X Academic API"
+    url: "https://developer.twitter.com"
+    licence: "Academic"
+    update_frequency: "daily"
+    requires_auth: true
+    notes: "Full-archive search. Requires ~5 day research application review."
+
+  - code: NEWS_NG
+    name: "Nigerian News Archives"
+    url: "https://punchng.com, https://vanguardngr.com, https://guardian.ng, https://premiumtimesng.com"
+    licence: "Fair Use"
+    update_frequency: "daily"
+    requires_auth: false
+    notes: "Scrapy spiders for academic NLP research. Public pages."
+
+  - code: AFRICA_CDC
+    name: "Africa CDC Mpox Dashboard"
+    url: "https://africacdc.org/disease/mpox"
+    licence: "Public"
+    update_frequency: "weekly"
+    requires_auth: false
+    notes: "Country and sub-regional mpox data for Africa."
