@@ -366,7 +366,7 @@ svg.chart{overflow:visible}
         </div>
         <div style="padding:0">
           <table class="fold-table">
-            <thead><tr><th>Fold</th><th>ROC-AUC</th><th>Sensitivity</th><th>FAR</th><th>KPI</th></tr></thead>
+            <thead><tr><th>Fold</th><th>ROC-AUC</th><th>Sensitivity</th><th>FAR</th></tr></thead>
             <tbody id="fold-tbody"></tbody>
           </table>
         </div>
@@ -632,13 +632,11 @@ function renderFolds() {
   document.getElementById("fold-tbody").innerHTML = folds.map(function(f){
     if (f.roc_auc===null||f.roc_auc===undefined)
       return "<tr><td style='font-size:11px'>"+f.fold+"</td><td colspan='4' style='color:var(--text-4);font-size:11px'>Skipped — insufficient positives in test set</td></tr>";
-    var pass = f.roc_auc >= 0.80;
     return "<tr>"
       +"<td style='font-size:11px'>"+f.fold+"</td>"
       +"<td>"+f.roc_auc.toFixed(3)+"</td>"
       +"<td>"+(f.sensitivity!==undefined?(f.sensitivity*100).toFixed(1)+"%":"—")+"</td>"
-      +"<td>"+(f.false_alarm_rate!==undefined?(f.false_alarm_rate*100).toFixed(1)+"%":"—")+"</td>"
-      +"<td class='"+(pass?"pass":"fail")+"'>"+(pass?"✓ PASS":"✗ FAIL")+"</td></tr>";
+      +"<td>"+(f.false_alarm_rate!==undefined?(f.false_alarm_rate*100).toFixed(1)+"%":"—")+"</td></tr>";
   }).join("");
 }
 
