@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartMpox — Case Report Form</title>
+<style>
+/* ── Design tokens ─────────────────────────────── */
+:root {
+  --accent:       #0FA37F;
+  --accent-dark:  #0C8568;
+  --accent-bg:    #E8F7F3;
+  --bg:           #F4F8F8;
+  --surface:      #FFFFFF;
+  --border:       #C9DFDB;
+  --border-focus: #0FA37F;
+  --text-primary: #12282A;
+  --text-secondary:#3E5F5C;
+  --text-muted:   #7A9B97;
+  --label-color:  #3E5F5C;
+  --error-bg:     #FFF0F0;
+  --error-border: #DC2626;
+  --error-text:   #B91C1C;
+  --success-bg:   #ECFDF5;
+  --success-border:#059669;
+  --success-text: #065F46;
+  --warning-bg:   #FFFBEB;
+  --warning-border:#D97706;
+  --required:     #DC2626;
+  --chip-bg:      #E8F7F3;
+  --chip-text:    #0C8568;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.08);
+  --shadow-card:  0 2px 8px rgba(0,0,0,.06);
+  --radius:       8px;
+  --radius-sm:    4px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:           #0B1A1C;
+    --surface:      #132022;
+    --border:       #1E383C;
+    --border-focus: #0FA37F;
+    --text-primary: #E4F0EF;
+    --text-secondary:#8BBAB5;
+    --text-muted:   #4D7A75;
+    --label-color:  #8BBAB5;
+    --error-bg:     #1F0A0A;
+    --error-border: #DC2626;
+    --error-text:   #F87171;
+    --success-bg:   #0A1F17;
+    --success-border:#059669;
+    --success-text: #34D399;
+    --warning-bg:   #1A1000;
+    --warning-border:#D97706;
+    --chip-bg:      #0C2922;
+    --chip-text:    #0FA37F;
+    --shadow-sm:    0 1px 3px rgba(0,0,0,.3);
+    --shadow-card:  0 2px 8px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"] {
+  --bg:           #0B1A1C;
+  --surface:      #132022;
+  --border:       #1E383C;
+  --border-focus: #0FA37F;
+  --text-primary: #E4F0EF;
+  --text-secondary:#8BBAB5;
+  --text-muted:   #4D7A75;
+  --label-color:  #8BBAB5;
+  --error-bg:     #1F0A0A;
+  --error-border: #DC2626;
+  --error-text:   #F87171;
+  --success-bg:   #0A1F17;
+  --success-border:#059669;
+  --success-text: #34D399;
+  --warning-bg:   #1A1000;
+  --warning-border:#D97706;
+  --chip-bg:      #0C2922;
+  --chip-text:    #0FA37F;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.3);
+  --shadow-card:  0 2px 8px rgba(0,0,0,.25);
+}
+:root[data-theme="light"] {
+  --bg:           #F4F8F8;
+  --surface:      #FFFFFF;
+  --border:       #C9DFDB;
+  --border-focus: #0FA37F;
+  --text-primary: #12282A;
+  --text-secondary:#3E5F5C;
+  --text-muted:   #7A9B97;
+  --label-color:  #3E5F5C;
+  --error-bg:     #FFF0F0;
+  --error-border: #DC2626;
+  --error-text:   #B91C1C;
+  --success-bg:   #ECFDF5;
+  --success-border:#059669;
+  --success-text: #065F46;
+  --warning-bg:   #FFFBEB;
+  --warning-border:#D97706;
+  --chip-bg:      #E8F7F3;
+  --chip-text:    #0C8568;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.08);
+  --shadow-card:  0 2px 8px rgba(0,0,0,.06);
+}
+
+/* ── Reset & base ──────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+/* ── Header ────────────────────────────────────── */
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  max-width: 900px; margin: 0 auto;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-mark {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-mark svg { width: 20px; height: 20px; fill: #fff; }
+.logo-text { line-height: 1.2; }
+.logo-text .brand { font-weight: 700; font-size: 17px; color: var(--text-primary); letter-spacing: -.3px; }
+.logo-text .sub { font-size: 11px; color: var(--text-muted); letter-spacing: .5px; text-transform: uppercase; }
+.header-actions { display: flex; align-items: center; gap: 10px; }
+.theme-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-secondary); border-radius: var(--radius-sm);
+  padding: 5px 10px; font-size: 13px; cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.theme-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Page wrapper ──────────────────────────────── */
+.page { max-width: 900px; margin: 0 auto; padding: 32px 20px 80px; }
+
+/* ── Page intro ────────────────────────────────── */
+.page-intro { margin-bottom: 28px; }
+.page-intro h1 { font-size: 22px; font-weight: 700; color: var(--text-primary); letter-spacing: -.3px; }
+.page-intro p { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
+
+/* ── Progress bar ──────────────────────────────── */
+.progress-bar {
+  display: flex; gap: 6px; margin-bottom: 28px; flex-wrap: wrap;
+}
+.progress-step {
+  flex: 1; min-width: 60px;
+  padding: 7px 0;
+  text-align: center;
+  font-size: 11px; letter-spacing: .5px; text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 3px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+}
+.progress-step.active { color: var(--accent); border-color: var(--accent); font-weight: 600; }
+.progress-step.done { color: var(--text-muted); border-color: var(--accent-dark); }
+
+/* ── Card / Section ────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.card-icon {
+  width: 28px; height: 28px;
+  background: var(--chip-bg);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.card-icon svg { width: 15px; height: 15px; stroke: var(--accent); }
+.card-title { font-size: 14px; font-weight: 700; color: var(--text-primary); letter-spacing: -.1px; }
+.card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.card-body { padding: 20px; }
+.card-section { display: none; }
+.card-section.active { display: block; }
+
+/* ── Grid layout ───────────────────────────────── */
+.grid { display: grid; gap: 18px; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 640px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+
+/* ── Form fields ───────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.label {
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--label-color);
+}
+.label .req { color: var(--required); margin-left: 2px; }
+.hint { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+input[type="text"], input[type="number"], input[type="date"],
+select, textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+  appearance: none; -webkit-appearance: none;
+}
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus,
+select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(15,163,127,.15);
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237A9B97'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+textarea { resize: vertical; min-height: 80px; }
+.field-error { font-size: 12px; color: var(--error-text); }
+
+/* ── Radio / Checkbox groups ───────────────────── */
+.radio-group, .check-group {
+  display: flex; gap: 10px; flex-wrap: wrap; padding-top: 2px;
+}
+.radio-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px; color: var(--text-secondary);
+  transition: all .12s;
+}
+.radio-pill input { display: none; }
+.radio-pill:has(input:checked) {
+  background: var(--chip-bg);
+  border-color: var(--accent);
+  color: var(--chip-text);
+  font-weight: 600;
+}
+.radio-pill .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  transition: all .12s;
+}
+.radio-pill:has(input:checked) .dot {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.check-item {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; font-size: 14px; color: var(--text-secondary);
+}
+.check-item input[type="checkbox"] {
+  width: 16px; height: 16px; flex-shrink: 0;
+  appearance: auto; -webkit-appearance: auto;
+  cursor: pointer; accent-color: var(--accent);
+  margin: 0; padding: 0;
+}
+.check-item input[type="checkbox"]:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Toggle / hidden fields ────────────────────── */
+.conditional { display: none; }
+.conditional.show { display: block; }
+.conditional-grid { display: none; }
+.conditional-grid.show { display: grid; gap: 18px; }
+
+/* ── Section nav ───────────────────────────────── */
+.nav-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 24px; gap: 12px;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  border: none; cursor: pointer;
+  font-size: 14px; font-weight: 600;
+  font-family: inherit;
+  transition: background .12s, transform .08s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); }
+.btn-outline { background: none; color: var(--text-secondary); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: var(--error-border); color: #fff; }
+.btn-danger:hover { background: #b91c1c; }
+.btn svg { width: 16px; height: 16px; }
+
+/* ── Alerts ────────────────────────────────────── */
+.alert {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  border-left: 4px solid;
+  font-size: 14px;
+  margin-bottom: 18px;
+  display: none;
+}
+.alert.show { display: block; }
+.alert-success { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
+.alert-error { background: var(--error-bg); border-color: var(--error-border); color: var(--error-text); }
+.alert-warning { background: var(--warning-bg); border-color: var(--warning-border); color: var(--text-primary); }
+.alert h4 { font-weight: 700; margin-bottom: 4px; }
+.alert ul { margin: 6px 0 0 16px; }
+
+/* ── Spinner ───────────────────────────────────── */
+.spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Review table ──────────────────────────────── */
+.review-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.review-table tr:nth-child(even) td { background: var(--bg); }
+.review-table td { padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.review-table td:first-child { color: var(--text-muted); width: 40%; font-weight: 500; }
+.review-table td:last-child { color: var(--text-primary); font-weight: 500; }
+
+/* ── Success screen ────────────────────────────── */
+.success-screen { display: none; text-align: center; padding: 48px 20px; }
+.success-screen.show { display: block; }
+.success-icon {
+  width: 72px; height: 72px;
+  background: var(--success-bg);
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+}
+.success-icon svg { width: 38px; height: 38px; stroke: var(--success-border); }
+.success-screen h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.success-screen p { color: var(--text-secondary); font-size: 14px; margin-bottom: 6px; }
+.case-id { font-family: monospace; font-size: 18px; color: var(--accent); font-weight: 700; letter-spacing: 1px; }
+
+/* ── Section divider ───────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* ── Footer ────────────────────────────────────── */
+.site-footer {
+  text-align: center; padding: 20px;
+  font-size: 12px; color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <div class="brand">SmartMpox</div>
+        <div class="sub">Case Reporting Portal · Nigeria</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">☀ / ☾</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="page">
+
+  <div class="page-intro">
+    <h1>Mpox Case Report</h1>
+    <p>Complete all sections below. Fields marked <span style="color:var(--required)">*</span> are required. Data is submitted to the SmartMpox surveillance warehouse in real time.</p>
+  </div>
+
+  <!-- Progress steps -->
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-step active" onclick="goToSection(0)">Case</div>
+    <div class="progress-step" onclick="goToSection(1)">Location</div>
+    <div class="progress-step" onclick="goToSection(2)">Patient</div>
+    <div class="progress-step" onclick="goToSection(3)">Symptoms</div>
+    <div class="progress-step" onclick="goToSection(4)">Exposure</div>
+    <div class="progress-step" onclick="goToSection(5)">Lab</div>
+    <div class="progress-step" onclick="goToSection(6)">Outcome</div>
+    <div class="progress-step" onclick="goToSection(7)">Review</div>
+  </div>
+
+  <!-- ─── GLOBAL ALERTS ─── -->
+  <div class="alert alert-error" id="globalError">
+    <h4 id="globalErrorTitle">Submission failed</h4>
+    <p id="globalErrorMsg"></p>
+  </div>
+  <div class="alert alert-warning" id="validationAlert">
+    <h4>Please fix the following before continuing:</h4>
+    <ul id="validationList"></ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION 0 — Case Identification             -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="card card-section active" id="section-0">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="4" rx="1"/><path d="M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="12" y1="9" x2="12" y2="15"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Case Identification</div>
+        <div class="card-subtitle">Classification, dates, and clade</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="grid">
+        <!-- Classification -->
+        <div class="field">
+          <label class="label">Case Classification <span class="req">*</span></label>
+          <div class="radio-group" id="classificationGroup">
+            <label class="radio-pill"><input type="radio" name="classification" value="suspected"><span class="dot"></span> Suspected</label>
+            <label class="radio-pill"><input type="radio" name="classification" value="probable"><span class="dot"></span> Probable</label>
+            <label class="radio-pill"><input type="radio" name="classification" value="confirmed"><span class="dot"></span> Confirmed</label>
+            <label class="radio-pill"><input type="radio" name="classification" value="discarded"><span class="dot"></span> Discarded</label>
+          </div>
+        </div>
+
+        <!-- Dates row -->
+        <div class="grid grid-2">
+          <div class="field">
+            <label class="label" for="dateOnset">Date of Symptom Onset</label>
+            <input type="date" id="dateOnset" name="date_onset" max="">
+          </div>
+          <div class="field">
+            <label class="label" for="dateReported">Date Reported <span class="req">*</span></label>
+            <input type="date" id="dateReported" name="date_reported" max="">
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="field">
+            <label class="label" for="dateNotified">Date Notified to NCDC</label>
+            <input type="date" id="dateNotified" name="date_notified" max="">
+          </div>
+          <div class="field">
+            <label class="label" for="dateHospitalised">Date Hospitalised</label>
+            <input type="date" id="dateHospitalised" name="date_hospitalised" max="">
+          </div>
+        </div>
+
+        <!-- Clade -->
+        <div class="field">
+          <label class="label">Clade <span style="font-weight:400;text-transform:none;font-size:11px;">(if known)</span></label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="clade" value=""><span class="dot"></span> Unknown</label>
+            <label class="radio-pill"><input type="radio" name="clade" value="clade_II"><span class="dot"></span> Clade II</label>
+            <label class="radio-pill"><input type="radio" name="clade" value="clade_I"><span class="dot"></span> Clade I</label>
+            <label class="radio-pill"><input type="radio" name="clade" value="clade_Ib"><span class="dot"></span> Clade Ib</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <span></span>
+        <button class="btn btn-primary" onclick="nextSection(0)">
+          Next: Location
+          <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION 1 — Location                        -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="card card-section" id="section-1">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Location</div>
+        <div class="card-subtitle">Where was the case reported?</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="grid">
+        <div class="grid grid-2">
+          <div class="field">
+            <label class="label" for="stateId">State <span class="req">*</span></label>
+            <select id="stateId" name="state_id">
+              <option value="">— Select State —</option>
+              <option value="1">Abia</option>
+              <option value="2">Adamawa</option>
+              <option value="3">Akwa Ibom</option>
+              <option value="4">Anambra</option>
+              <option value="5">Bauchi</option>
+              <option value="6">Bayelsa</option>
+              <option value="7">Benue</option>
+              <option value="8">Borno</option>
+              <option value="9">Cross River</option>
+              <option value="10">Delta</option>
+              <option value="11">Ebonyi</option>
+              <option value="12">Edo</option>
+              <option value="13">Ekiti</option>
+              <option value="14">Enugu</option>
+              <option value="37">FCT Abuja</option>
+              <option value="15">Gombe</option>
+              <option value="16">Imo</option>
+              <option value="17">Jigawa</option>
+              <option value="18">Kaduna</option>
+              <option value="19">Kano</option>
+              <option value="20">Katsina</option>
+              <option value="21">Kebbi</option>
+              <option value="22">Kogi</option>
+              <option value="23">Kwara</option>
+              <option value="24">Lagos</option>
+              <option value="25">Nasarawa</option>
+              <option value="26">Niger</option>
+              <option value="27">Ogun</option>
+              <option value="28">Ondo</option>
+              <option value="29">Osun</option>
+              <option value="30">Oyo</option>
+              <option value="31">Plateau</option>
+              <option value="32">Rivers</option>
+              <option value="33">Sokoto</option>
+              <option value="34">Taraba</option>
+              <option value="35">Yobe</option>
+              <option value="36">Zamfara</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" for="locationPrecision">Location Precision</label>
+            <select id="locationPrecision" name="location_precision">
+              <option value="state">State level</option>
+              <option value="lga">LGA level</option>
+              <option value="facility">Facility level</option>
+              <option value="gps">GPS coordinates</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="facilityName">Reporting Facility Name</label>
+          <input type="text" id="facilityName" placeholder="e.g. General Hospital Lagos, ISTH Irrua" maxlength="200">
+          <span class="hint">Hospital, health centre, or lab that reported the case.</span>
+        </div>
+
+        <div class="field">
+          <label class="label" for="lgaName">LGA <span style="font-weight:400;text-transform:none;font-size:11px;">(optional — type name)</span></label>
+          <input type="text" id="lgaName" placeholder="e.g. Ikorodu, Onitsha North" maxlength="100">
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-outline" onclick="prevSection(1)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="nextSection(1)">
+          Next: Patient
+          <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION 2 — Patient Demographics            -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="card card-section" id="section-2">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Patient Demographics</div>
+        <div class="card-subtitle">Age, sex, and occupation</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="grid">
+        <div class="grid grid-3">
+          <div class="field">
+            <label class="label" for="ageYears">Age (Years)</label>
+            <input type="number" id="ageYears" name="age_years" min="0" max="120" placeholder="e.g. 34" oninput="autoAgeGroup(this.value)">
+          </div>
+          <div class="field">
+            <label class="label" for="ageGroup">Age Group</label>
+            <select id="ageGroup" name="age_group">
+              <option value="unknown">Unknown</option>
+              <option value="<5">&lt; 5 years</option>
+              <option value="5-14">5–14 years</option>
+              <option value="15-29">15–29 years</option>
+              <option value="30-44">30–44 years</option>
+              <option value="45-59">45–59 years</option>
+              <option value="60+">60+ years</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" for="occupation">Occupation</label>
+            <input type="text" id="occupation" name="occupation" placeholder="e.g. Farmer, Healthcare worker" maxlength="100">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Sex</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="sex" value="M"><span class="dot"></span> Male</label>
+            <label class="radio-pill"><input type="radio" name="sex" value="F"><span class="dot"></span> Female</label>
+            <label class="radio-pill"><input type="radio" name="sex" value="U" checked><span class="dot"></span> Unknown</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Previous Smallpox Vaccination?</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="vaccinated_smallpox" value=""><span class="dot"></span> Unknown</label>
+            <label class="radio-pill"><input type="radio" name="vaccinated_smallpox" value="true"><span class="dot"></span> Yes</label>
+            <label class="radio-pill"><input type="radio" name="vaccinated_smallpox" value="false"><span class="dot"></span> No</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-outline" onclick="prevSection(2)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="nextSection(2)">
+          Next: Symptoms
+          <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION 3 — Symptoms                        -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="card card-section" id="section-3">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Clinical Symptoms</div>
+        <div class="card-subtitle">Tick all symptoms present at time of assessment</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="grid grid-2">
+        <div class="field">
+          <label class="label">Symptoms Present</label>
+          <div class="check-group" style="flex-direction:column;gap:12px;">
+            <label class="check-item"><input type="checkbox" id="symFever" name="symptom_fever"> Fever</label>
+            <label class="check-item"><input type="checkbox" id="symRash" name="symptom_rash"> Rash / Skin lesions</label>
+            <label class="check-item"><input type="checkbox" id="symLymph" name="symptom_lymphadenopathy"> Lymphadenopathy (swollen glands)</label>
+            <label class="check-item"><input type="checkbox" id="symHeadache" name="symptom_headache"> Headache</label>
+            <label class="check-item"><input type="checkbox" id="symMyalgia" name="symptom_myalgia"> Myalgia (muscle pain)</label>
+            <label class="check-item"><input type="checkbox" id="symOther" name="symptom_other" onchange="toggleOther(this.checked)"> Other symptom(s)</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="conditional" id="otherSymptomField" style="margin-top:20px;">
+            <label class="label" for="symOtherText">Describe Other Symptom(s)</label>
+            <textarea id="symOtherText" rows="4" placeholder="Describe additional symptoms..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-outline" onclick="prevSection(3)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="nextSection(3)">
+          Next: Exposure
+          <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION 4 — Exposure & Contact              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="card card-section" id="section-4">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Exposure &amp; Contact History</div>
+        <div class="card-subtitle">Animal contact, bushmeat, and travel</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="grid">
+        <div class="field">
+          <label class="label">Contact Type</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="contact_type" value=""><span class="dot"></span> Unknown</label>
+            <label class="radio-pill"><input type="radio" name="contact_type" value="animal"><span class="dot"></span> Animal</label>
+            <label class="radio-pill"><input type="radio" name="contact_type" value="human"><span class="dot"></span> Human</label>
+            <label class="radio-pill"><input type="radio" name="contact_type" value="both"><span class="dot"></span> Both</label>
+            <label class="radio-pill"><input type="radio" name="contact_type" value="none"><span class="dot"></span> None</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label">Exposures</label>
+          <div class="check-group" style="flex-direction:column;gap:12px;">
+            <label class="check-item"><input type="checkbox" id="expAnimal" name="exposure_animal"> Animal exposure (rodents, non-human primates)</label>
+            <label class="check-item"><input type="checkbox" id="expBushmeat" name="exposure_bushmeat"> Bushmeat contact (handling or consumption)</label>
+            <label class="check-item"><input type="checkbox" id="expTravel" name="travel_history" onchange="toggleTravel(this.checked)"> Recent travel history</label>
+          </div>
+        </div>
+
+        <div class="conditional-grid" id="travelFields">
+          <div class="field">
+            <label class="label" for="travelCountry">Travel Destination(s)</label>
+            <input type="text" id="travelCountry" name="travel_country" placeholder="e.g. Cameroon, DRC, UK" maxlength="200">
+            <span class="hint">Country or countries visited in the 21 days before onset.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-outline" onclick="prevSection(4)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="nextSection(4)">
+          Next: Lab
+          <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION 5 — Laboratory                      -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="card card-section" id="section-5">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11l3 3 3-3V3M5 9H3m18 0h-2"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Laboratory</div>
+        <div class="card-subtitle">Testing method and result</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="grid">
+        <div class="field">
+          <label class="label">Lab Test Performed?</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="lab_tested" value="false" onchange="toggleLab(this.value)" checked><span class="dot"></span> Not tested</label>
+            <label class="radio-pill"><input type="radio" name="lab_tested" value="true" onchange="toggleLab(this.value)"><span class="dot"></span> Yes — tested</label>
+          </div>
+        </div>
+
+        <div class="conditional-grid grid-2" id="labFields">
+          <div class="field">
+            <label class="label" for="labMethod">Lab Method</label>
+            <select id="labMethod" name="lab_method">
+              <option value="">— Select —</option>
+              <option value="PCR">PCR (RT-PCR)</option>
+              <option value="Serology">Serology</option>
+              <option value="Sequencing">Whole-genome sequencing</option>
+              <option value="Culture">Viral culture</option>
+              <option value="Microscopy">Electron microscopy</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label">Lab Result</label>
+            <div class="radio-group">
+              <label class="radio-pill"><input type="radio" name="lab_result" value="positive"><span class="dot"></span> Positive</label>
+              <label class="radio-pill"><input type="radio" name="lab_result" value="negative"><span class="dot"></span> Negative</label>
+              <label class="radio-pill"><input type="radio" name="lab_result" value="pending"><span class="dot"></span> Pending</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-outline" onclick="prevSection(5)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="nextSection(5)">
+          Next: Outcome
+          <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION 6 — Outcome & Notes                 -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="card card-section" id="section-6">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Outcome &amp; Notes</div>
+        <div class="card-subtitle">Patient outcome and additional information</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="grid">
+        <div class="field">
+          <label class="label">Patient Outcome</label>
+          <div class="radio-group">
+            <label class="radio-pill"><input type="radio" name="outcome" value="unknown" checked><span class="dot"></span> Unknown</label>
+            <label class="radio-pill"><input type="radio" name="outcome" value="alive"><span class="dot"></span> Alive / Recovered</label>
+            <label class="radio-pill"><input type="radio" name="outcome" value="dead"><span class="dot"></span> Deceased</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="label" for="dateOutcome">Date of Outcome <span style="font-weight:400;text-transform:none;font-size:11px;">(if known)</span></label>
+          <input type="date" id="dateOutcome" name="date_outcome" max="" style="max-width:220px;">
+        </div>
+
+        <div class="field">
+          <label class="label" for="notesField">Additional Notes</label>
+          <textarea id="notesField" name="notes" rows="4" placeholder="Any additional clinical information, contact tracing notes, or relevant context..."></textarea>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn btn-outline" onclick="prevSection(6)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="nextSection(6)">
+          Review &amp; Submit
+          <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SECTION 7 — Review & Submit                 -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="card card-section" id="section-7">
+    <div class="card-header">
+      <div class="card-icon">
+        <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div>
+        <div class="card-title">Review &amp; Submit</div>
+        <div class="card-subtitle">Confirm all details before submission</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <div class="alert alert-warning show" id="reviewWarning">
+        <strong>Please review carefully.</strong> Once submitted, the case record enters the surveillance warehouse immediately. Corrections require supervisor access.
+      </div>
+
+      <table class="review-table" id="reviewTable">
+        <tbody id="reviewBody"></tbody>
+      </table>
+
+      <div class="nav-row" style="margin-top:24px;">
+        <button class="btn btn-outline" onclick="prevSection(7)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          Back &amp; Edit
+        </button>
+        <button class="btn btn-primary" id="submitBtn" onclick="submitCase()">
+          Submit Case Report
+          <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SUCCESS SCREEN                              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="success-screen card" id="successScreen">
+    <div class="success-icon">
+      <svg fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2>Case Reported Successfully</h2>
+    <p>The case has been submitted to the SmartMpox surveillance warehouse.</p>
+    <p style="margin-top:12px;font-size:13px;color:var(--text-muted)">Case ID:</p>
+    <div class="case-id" id="caseIdDisplay">—</div>
+    <p style="margin-top:8px;font-size:12px;color:var(--text-muted)">Submitted: <span id="submittedAt">—</span></p>
+    <div style="margin-top:28px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="resetForm()">Report Another Case</button>
+      <button class="btn btn-outline" onclick="window.print()">Print Record</button>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  SmartMpox Nigeria · Phase 2 Surveillance Portal · Data transmitted to Supabase (EU-West-1) · All data is encrypted in transit
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════ */
+/* CONFIG                                         */
+/* ══════════════════════════════════════════════ */
+var SUPABASE_URL  = "https://tspwkxyiralnukmefagl.supabase.co";
+var SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcHdreHlpcmFsbnVrbWVmYWdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyMDMwNTYsImV4cCI6MjEwMTc3OTA1Nn0.Jcmy5vwAjybjv5rkWX6r5LHC0-9ulQtVuUX1bWiH70s";
+var SOURCE_ID     = 16; // SmartMpox Web Portal
+
+/* ══════════════════════════════════════════════ */
+/* STATE NAMES (for review table)                 */
+/* ══════════════════════════════════════════════ */
+var STATE_NAMES = {
+  "1":"Abia","2":"Adamawa","3":"Akwa Ibom","4":"Anambra","5":"Bauchi",
+  "6":"Bayelsa","7":"Benue","8":"Borno","9":"Cross River","10":"Delta",
+  "11":"Ebonyi","12":"Edo","13":"Ekiti","14":"Enugu","37":"FCT Abuja",
+  "15":"Gombe","16":"Imo","17":"Jigawa","18":"Kaduna","19":"Kano",
+  "20":"Katsina","21":"Kebbi","22":"Kogi","23":"Kwara","24":"Lagos",
+  "25":"Nasarawa","26":"Niger","27":"Ogun","28":"Ondo","29":"Osun",
+  "30":"Oyo","31":"Plateau","32":"Rivers","33":"Sokoto","34":"Taraba",
+  "35":"Yobe","36":"Zamfara"
+};
+
+/* ══════════════════════════════════════════════ */
+/* THEME                                          */
+/* ══════════════════════════════════════════════ */
+(function() {
+  var saved = localStorage.getItem("theme");
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+})();
+function toggleTheme() {
+  var cur = document.documentElement.getAttribute("data-theme");
+  var next = (cur === "dark") ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  localStorage.setItem("theme", next);
+}
+
+/* ══════════════════════════════════════════════ */
+/* DATE LIMITS (can't select future dates)        */
+/* ══════════════════════════════════════════════ */
+(function() {
+  var today = new Date().toISOString().split("T")[0];
+  ["dateOnset","dateReported","dateNotified","dateHospitalised","dateOutcome"].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.max = today;
+  });
+  // Default date_reported to today
+  var dr = document.getElementById("dateReported");
+  if (dr) dr.value = today;
+})();
+
+/* ══════════════════════════════════════════════ */
+/* MULTI-SECTION NAVIGATION                       */
+/* ══════════════════════════════════════════════ */
+var currentSection = 0;
+var TOTAL_SECTIONS = 8;
+
+function showSection(n) {
+  for (var i = 0; i < TOTAL_SECTIONS; i++) {
+    var sec = document.getElementById("section-" + i);
+    var step = document.querySelectorAll(".progress-step")[i];
+    if (sec) sec.classList.toggle("active", i === n);
+    if (step) {
+      step.classList.toggle("active", i === n);
+      step.classList.toggle("done", i < n);
+    }
+  }
+  currentSection = n;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  hideAlerts();
+}
+function goToSection(n) { showSection(n); }
+function prevSection(n) { showSection(n - 1); }
+function nextSection(n) {
+  var errors = validateSection(n);
+  if (errors.length) {
+    showValidationErrors(errors);
+    return;
+  }
+  if (n === 6) {
+    buildReview();
+    showSection(7);
+  } else {
+    showSection(n + 1);
+  }
+}
+
+/* ══════════════════════════════════════════════ */
+/* SECTION VALIDATION                             */
+/* ══════════════════════════════════════════════ */
+function validateSection(n) {
+  var errors = [];
+  if (n === 0) {
+    var cls = document.querySelector('input[name="classification"]:checked');
+    if (!cls) errors.push("Case Classification is required");
+    var dr = document.getElementById("dateReported").value;
+    if (!dr) errors.push("Date Reported is required");
+  }
+  if (n === 1) {
+    var st = document.getElementById("stateId").value;
+    if (!st) errors.push("State is required");
+  }
+  return errors;
+}
+function showValidationErrors(errors) {
+  var alert = document.getElementById("validationAlert");
+  var list  = document.getElementById("validationList");
+  list.innerHTML = errors.map(function(e) { return "<li>" + e + "</li>"; }).join("");
+  alert.classList.add("show");
+  alert.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+function hideAlerts() {
+  document.getElementById("validationAlert").classList.remove("show");
+  document.getElementById("globalError").classList.remove("show");
+}
+
+/* ══════════════════════════════════════════════ */
+/* CONDITIONAL FIELDS                             */
+/* ══════════════════════════════════════════════ */
+function toggleOther(checked) {
+  document.getElementById("otherSymptomField").classList.toggle("show", checked);
+}
+function toggleTravel(checked) {
+  document.getElementById("travelFields").classList.toggle("show", checked);
+}
+function toggleLab(val) {
+  document.getElementById("labFields").classList.toggle("show", val === "true");
+}
+
+/* ══════════════════════════════════════════════ */
+/* AUTO AGE GROUP                                 */
+/* ══════════════════════════════════════════════ */
+function autoAgeGroup(val) {
+  var age = parseInt(val, 10);
+  var sel = document.getElementById("ageGroup");
+  if (isNaN(age)) { sel.value = "unknown"; return; }
+  if (age < 5)         sel.value = "<5";
+  else if (age <= 14)  sel.value = "5-14";
+  else if (age <= 29)  sel.value = "15-29";
+  else if (age <= 44)  sel.value = "30-44";
+  else if (age <= 59)  sel.value = "45-59";
+  else                 sel.value = "60+";
+}
+
+/* ══════════════════════════════════════════════ */
+/* BUILD REVIEW TABLE                             */
+/* ══════════════════════════════════════════════ */
+function buildReview() {
+  var data = collectFormData();
+  var rows = [
+    ["Classification",   data.case_classification || "—"],
+    ["Date Reported",    data.date_reported || "—"],
+    ["Date of Onset",    data.date_onset || "—"],
+    ["Date Notified",    data.date_notified || "—"],
+    ["Date Hospitalised",data.date_hospitalised || "—"],
+    ["Clade",            data.clade || "Unknown"],
+    ["State",            STATE_NAMES[data.state_id] || "—"],
+    ["Location Precision",data.location_precision || "—"],
+    ["Facility",         data._facility || "—"],
+    ["LGA",              data._lga || "—"],
+    ["Age (years)",      data.age_years != null ? data.age_years : "—"],
+    ["Age Group",        data.age_group || "—"],
+    ["Sex",              {M:"Male",F:"Female",U:"Unknown"}[data.sex] || "—"],
+    ["Occupation",       data.occupation || "—"],
+    ["Smallpox Vacc.",   data.vaccinated_smallpox === true ? "Yes" : data.vaccinated_smallpox === false ? "No" : "Unknown"],
+    ["Symptoms",         buildSymptomSummary(data)],
+    ["Contact Type",     data.contact_type || "Unknown"],
+    ["Animal Exposure",  data.exposure_animal ? "Yes" : "No"],
+    ["Bushmeat Exposure",data.exposure_bushmeat ? "Yes" : "No"],
+    ["Travel History",   data.travel_history ? "Yes — " + (data.travel_country || "unknown destination") : "No"],
+    ["Lab Tested",       data.lab_tested ? "Yes" : "No"],
+    ["Lab Method",       data.lab_method || "—"],
+    ["Lab Result",       data.lab_result || "—"],
+    ["Outcome",          data.outcome || "Unknown"],
+    ["Date of Outcome",  data.date_outcome || "—"],
+    ["Notes",            data.notes || "—"],
+  ];
+  var html = rows.map(function(r) {
+    return "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td></tr>";
+  }).join("");
+  document.getElementById("reviewBody").innerHTML = html;
+}
+function buildSymptomSummary(data) {
+  var syms = [];
+  if (data.symptom_fever)          syms.push("Fever");
+  if (data.symptom_rash)           syms.push("Rash");
+  if (data.symptom_lymphadenopathy)syms.push("Lymphadenopathy");
+  if (data.symptom_headache)       syms.push("Headache");
+  if (data.symptom_myalgia)        syms.push("Myalgia");
+  if (data.symptom_other)          syms.push("Other: " + (data._other_text || ""));
+  return syms.length ? syms.join(", ") : "None recorded";
+}
+
+/* ══════════════════════════════════════════════ */
+/* COLLECT FORM DATA                              */
+/* ══════════════════════════════════════════════ */
+function collectFormData() {
+  var clsEl  = document.querySelector('input[name="classification"]:checked');
+  var sexEl  = document.querySelector('input[name="sex"]:checked');
+  var vacEl  = document.querySelector('input[name="vaccinated_smallpox"]:checked');
+  var ctyEl  = document.querySelector('input[name="contact_type"]:checked');
+  var labEl  = document.querySelector('input[name="lab_tested"]:checked');
+  var lresEl = document.querySelector('input[name="lab_result"]:checked');
+  var outEl  = document.querySelector('input[name="outcome"]:checked');
+  var cladeEl= document.querySelector('input[name="clade"]:checked');
+
+  var stateId    = document.getElementById("stateId").value;
+  var ageVal     = document.getElementById("ageYears").value;
+  var facilityTxt= document.getElementById("facilityName").value.trim();
+  var lgaTxt     = document.getElementById("lgaName").value.trim();
+  var otherSymTxt= document.getElementById("symOtherText").value.trim();
+
+  // Build notes: combine facility, lga, and user notes
+  var noteParts = [];
+  if (facilityTxt) noteParts.push("Facility: " + facilityTxt);
+  if (lgaTxt)      noteParts.push("LGA: " + lgaTxt);
+  var userNotes = document.getElementById("notesField").value.trim();
+  if (userNotes)   noteParts.push(userNotes);
+  var finalNotes = noteParts.join(" | ") || null;
+
+  var vacBool = null;
+  if (vacEl && vacEl.value === "true")  vacBool = true;
+  if (vacEl && vacEl.value === "false") vacBool = false;
+
+  var labBool = labEl && labEl.value === "true";
+
+  var payload = {
+    source_id:           SOURCE_ID,
+    case_classification: clsEl  ? clsEl.value  : null,
+    date_onset:          document.getElementById("dateOnset").value          || null,
+    date_reported:       document.getElementById("dateReported").value        || null,
+    date_notified:       document.getElementById("dateNotified").value        || null,
+    date_hospitalised:   document.getElementById("dateHospitalised").value    || null,
+    date_outcome:        document.getElementById("dateOutcome").value         || null,
+    clade:               cladeEl && cladeEl.value ? cladeEl.value : null,
+    state_id:            stateId ? parseInt(stateId, 10) : null,
+    location_precision:  document.getElementById("locationPrecision").value   || null,
+    age_years:           ageVal !== "" ? parseInt(ageVal, 10) : null,
+    age_group:           document.getElementById("ageGroup").value || "unknown",
+    sex:                 sexEl  ? sexEl.value  : "U",
+    occupation:          document.getElementById("occupation").value.trim()   || null,
+    symptom_fever:       document.getElementById("symFever").checked,
+    symptom_rash:        document.getElementById("symRash").checked,
+    symptom_lymphadenopathy: document.getElementById("symLymph").checked,
+    symptom_headache:    document.getElementById("symHeadache").checked,
+    symptom_myalgia:     document.getElementById("symMyalgia").checked,
+    symptom_other:       document.getElementById("symOther").checked,
+    contact_type:        ctyEl && ctyEl.value ? ctyEl.value : null,
+    exposure_animal:     document.getElementById("expAnimal").checked,
+    exposure_bushmeat:   document.getElementById("expBushmeat").checked,
+    travel_history:      document.getElementById("expTravel").checked,
+    travel_country:      document.getElementById("travelCountry").value.trim() || null,
+    lab_tested:          labBool,
+    lab_method:          labBool ? (document.getElementById("labMethod").value || null) : null,
+    lab_result:          labBool && lresEl ? lresEl.value : "not_tested",
+    outcome:             outEl   ? outEl.value  : "unknown",
+    vaccinated_smallpox: vacBool,
+    notes:               finalNotes,
+    // private helpers for review table
+    _facility:           facilityTxt,
+    _lga:                lgaTxt,
+    _other_text:         otherSymTxt,
+  };
+
+  return payload;
+}
+
+/* ══════════════════════════════════════════════ */
+/* SUBMIT                                         */
+/* ══════════════════════════════════════════════ */
+function submitCase() {
+  var btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+  var data = collectFormData();
+
+  // Strip private helpers before sending
+  var payload = Object.assign({}, data);
+  delete payload._facility;
+  delete payload._lga;
+  delete payload._other_text;
+
+  // Remove null values (let DB use defaults) except required fields
+  Object.keys(payload).forEach(function(k) {
+    if (payload[k] === null || payload[k] === "") {
+      // Keep nulls — Supabase REST accepts them
+    }
+  });
+
+  fetch(SUPABASE_URL + "/rest/v1/cases_individual", {
+    method: "POST",
+    headers: {
+      "apikey":       SUPABASE_ANON,
+      "Authorization":"Bearer " + SUPABASE_ANON,
+      "Content-Type": "application/json",
+      "Prefer":       "return=representation"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(function(res) {
+    if (!res.ok) {
+      return res.json().then(function(err) {
+        throw new Error(err.message || err.details || "Server error " + res.status);
+      });
+    }
+    return res.json();
+  })
+  .then(function(rows) {
+    var rec = Array.isArray(rows) ? rows[0] : rows;
+    showSuccess(rec);
+  })
+  .catch(function(err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Submit Case Report <svg fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+    var errEl = document.getElementById("globalError");
+    document.getElementById("globalErrorTitle").textContent = "Submission failed";
+    document.getElementById("globalErrorMsg").textContent = err.message;
+    errEl.classList.add("show");
+    errEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+}
+
+function showSuccess(rec) {
+  // Hide all sections and progress bar
+  for (var i = 0; i < TOTAL_SECTIONS; i++) {
+    var s = document.getElementById("section-" + i);
+    if (s) s.classList.remove("active");
+  }
+  document.getElementById("progressBar").style.display = "none";
+  document.getElementById("pageIntro") && (document.getElementById("pageIntro").style.display = "none");
+
+  var screen = document.getElementById("successScreen");
+  screen.classList.add("show");
+
+  var caseId = (rec && rec.case_id) ? rec.case_id : "—";
+  document.getElementById("caseIdDisplay").textContent = caseId;
+  document.getElementById("submittedAt").textContent = new Date().toLocaleString("en-NG", {timeZone:"Africa/Lagos"});
+
+  screen.scrollIntoView({ behavior: "smooth" });
+}
+
+function resetForm() {
+  // Reload the page for a clean form
+  window.location.reload();
+}
+</script>
+</body>
+</html>

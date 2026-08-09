@@ -1,0 +1,37 @@
+name: P3 Social Media Scanner
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # daily at 06:00 UTC
+  workflow_dispatch:        # allows manual trigger from GitHub UI
+
+jobs:
+  scan:
+    name: Scrape & store mpox signals
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install \
+            feedparser>=6.0 \
+            requests>=2.32 \
+            psycopg2-binary>=2.9 \
+            python-dotenv>=1.0 \
+            langdetect>=1.0
+
+      - name: Run P3 scanner (RSS, mpox-relevant only)
+        run: python p3_scanner/pipeline.py --rss-only --mpox-only
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

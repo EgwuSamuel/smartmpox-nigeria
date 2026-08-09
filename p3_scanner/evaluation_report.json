@@ -1,0 +1,268 @@
+{
+  "classifier": {
+    "n_test": 30,
+    "tp": 15,
+    "fp": 0,
+    "tn": 15,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "accuracy": 1.0,
+    "errors": []
+  },
+  "misinformation": {
+    "n_test": 10,
+    "correct": 9,
+    "accuracy": 0.9,
+    "unique_themes_hit": [
+      "bioweapon",
+      "denial",
+      "exaggerated_transmission",
+      "false_treatment",
+      "stigma_gay",
+      "traditional_cure",
+      "vaccine_blame"
+    ],
+    "n_themes": 7,
+    "results": {
+      "The covid vaccine is causing people to get mpox \u2014 share this": {
+        "expected": "vaccine_blame",
+        "detected": [
+          "vaccine_blame"
+        ],
+        "correct": true
+      },
+      "Mpox is a hoax invented by the government to control us": {
+        "expected": "denial",
+        "detected": [
+          "denial"
+        ],
+        "correct": true
+      },
+      "Monkeypox na fake disease, dem just want control people": {
+        "expected": "denial",
+        "detected": [],
+        "correct": false
+      },
+      "The Pentagon engineered mpox as a bioweapon for depopulation": {
+        "expected": "bioweapon",
+        "detected": [
+          "bioweapon"
+        ],
+        "correct": true
+      },
+      "Bill Gates created mpox virus to sell vaccines and make bill": {
+        "expected": "bioweapon",
+        "detected": [
+          "bioweapon"
+        ],
+        "correct": true
+      },
+      "Mpox only spreads because of gay and immoral behaviour": {
+        "expected": "stigma_gay",
+        "detected": [
+          "stigma_gay"
+        ],
+        "correct": true
+      },
+      "Mpox is God's punishment on homosexuals who refuse to repent": {
+        "expected": "stigma_gay",
+        "detected": [
+          "stigma_gay"
+        ],
+        "correct": true
+      },
+      "Neem leaf tea and garlic cures mpox \u2014 share to save lives": {
+        "expected": "traditional_cure",
+        "detected": [
+          "traditional_cure"
+        ],
+        "correct": true
+      },
+      "Mpox spreads through the air like measles \u2014 highly contagiou": {
+        "expected": "exaggerated_transmission",
+        "detected": [
+          "exaggerated_transmission"
+        ],
+        "correct": true
+      },
+      "Ivermectin is a proven miracle cure for mpox \u2014 doctors won't": {
+        "expected": "false_treatment",
+        "detected": [
+          "false_treatment"
+        ],
+        "correct": true
+      }
+    }
+  },
+  "db_summary": {
+    "total_stored": 611,
+    "mpox_relevant": 295,
+    "by_platform": {
+      "rss_news": 285,
+      "reddit": 10
+    },
+    "by_language": {
+      "en": 293,
+      "ha": 127,
+      "fr": 113,
+      "yo": 41,
+      "pcm": 25,
+      "ig": 12
+    },
+    "n_languages": 6,
+    "top_sources": [
+      [
+        "Google News \u2014 monkeypox Africa",
+        96
+      ],
+      [
+        "Google News \u2014 mpox Nigeria",
+        96
+      ],
+      [
+        "Google News \u2014 mpox Hausa",
+        93
+      ],
+      [
+        "r/africa \u2014 mpox search",
+        6
+      ],
+      [
+        "r/epidemiology \u2014 mpox search",
+        3
+      ],
+      [
+        "r/Nigeria \u2014 mpox search",
+        1
+      ]
+    ],
+    "by_geo": [
+      [
+        [
+          "fct"
+        ],
+        2
+      ],
+      [
+        [
+          "kano"
+        ],
+        1
+      ],
+      [
+        [
+          "fct",
+          "lagos"
+        ],
+        1
+      ],
+      [
+        [
+          "benue"
+        ],
+        1
+      ],
+      [
+        [
+          "kaduna"
+        ],
+        1
+      ],
+      [
+        [
+          "edo"
+        ],
+        1
+      ]
+    ],
+    "date_range": [
+      "2022-05-19",
+      "2026-08-08"
+    ],
+    "monthly_trend": [
+      [
+        "2022-05",
+        "2022-05-19",
+        7
+      ],
+      [
+        "2022-06",
+        "2022-06-06",
+        2
+      ],
+      [
+        "2022-07",
+        "2022-07-01",
+        4
+      ],
+      [
+        "2022-09",
+        "2022-09-20",
+        2
+      ],
+      [
+        "2022-11",
+        "2022-11-29",
+        2
+      ],
+      [
+        "2022-12",
+        "2022-12-01",
+        1
+      ],
+      [
+        "2023-10",
+        "2023-10-09",
+        2
+      ],
+      [
+        "2023-11",
+        "2023-11-24",
+        1
+      ],
+      [
+        "2024-01",
+        "2024-01-28",
+        1
+      ],
+      [
+        "2024-03",
+        "2024-03-28",
+        1
+      ],
+      [
+        "2024-04",
+        "2024-04-23",
+        1
+      ],
+      [
+        "2024-05",
+        "2024-05-13",
+        1
+      ]
+    ],
+    "lead_time": [
+      [
+        "2022",
+        "2022-05-19",
+        "2022-01-24",
+        -115
+      ],
+      [
+        "2023",
+        "2023-10-09",
+        "2023-01-09",
+        -273
+      ],
+      [
+        "2024",
+        "2024-01-28",
+        "2024-08-19",
+        204
+      ]
+    ]
+  },
+  "generated_at": "2026-08-08T23:36:25.292339+00:00"
+}

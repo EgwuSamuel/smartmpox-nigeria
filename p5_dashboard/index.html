@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartMpox Nigeria — Early Warning Dashboard</title>
+<style>
+:root {
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --surface2:  #21262d;
+  --border:    #30363d;
+  --text:      #e6edf3;
+  --text-muted:#8b949e;
+  --text-sub:  #6e7681;
+  --accent:    #58a6ff;
+  --tier-green:    #22c55e;
+  --tier-amber:    #f59e0b;
+  --tier-red:      #ef4444;
+  --tier-critical: #a855f7;
+  --tier-green-bg:    rgba(34,197,94,0.12);
+  --tier-amber-bg:    rgba(245,158,11,0.12);
+  --tier-red-bg:      rgba(239,68,68,0.12);
+  --tier-critical-bg: rgba(168,85,247,0.12);
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+[data-theme="light"] {
+  --bg:#f0f4f8;--surface:#fff;--surface2:#f8fafc;--border:#e2e8f0;
+  --text:#1e293b;--text-muted:#64748b;--text-sub:#94a3b8;--accent:#2563eb;
+  --tier-green:#16a34a;--tier-amber:#d97706;--tier-red:#dc2626;--tier-critical:#7c3aed;
+  --tier-green-bg:rgba(22,163,74,.10);--tier-amber-bg:rgba(217,119,6,.10);
+  --tier-red-bg:rgba(220,38,38,.10);--tier-critical-bg:rgba(124,58,237,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.5}
+
+.header{display:flex;align-items:center;gap:16px;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#a855f7,#ef4444);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text h1{font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+.logo-text p{font-size:.72rem;color:var(--text-muted)}
+.header-spacer{flex:1}
+.view-toggle{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px}
+.view-btn{padding:5px 14px;border-radius:6px;border:none;background:transparent;color:var(--text-muted);font-size:.8rem;font-family:var(--font);cursor:pointer;transition:all .15s}
+.view-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.theme-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+.last-updated{font-size:.72rem;color:var(--text-sub);white-space:nowrap}
+
+.main{padding:20px 24px;max-width:1400px;margin:0 auto}
+.view{display:none}.view.active{display:block}
+
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.kpi-label{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em}
+.kpi-value{font-size:2rem;font-weight:700;line-height:1.1;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+.kpi-sub{font-size:.75rem;color:var(--text-muted)}
+.kpi-card.critical .kpi-value{color:var(--tier-critical)}
+.kpi-card.red .kpi-value{color:var(--tier-red)}
+.kpi-card.blue .kpi-value{color:var(--accent)}
+.kpi-card.green .kpi-value{color:var(--tier-green)}
+
+.exec-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:.82rem;font-weight:600}
+.card-body{padding:16px}
+
+#nigeria-map{width:100%;height:480px;display:block}
+.map-legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text-muted)}
+.legend-dot{width:12px;height:12px;border-radius:50%}
+
+.tooltip{position:fixed;pointer-events:none;z-index:200;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:.78rem;line-height:1.6;box-shadow:0 4px 16px rgba(0,0,0,.4);max-width:240px;display:none}
+.tt-name{font-weight:700;font-size:.85rem;margin-bottom:4px}
+.tt-row{display:flex;justify-content:space-between;gap:12px;color:var(--text-muted)}
+.tt-value{color:var(--text);font-variant-numeric:tabular-nums}
+
+.alert-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.alert-table th{text-align:left;padding:8px 10px;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sub);border-bottom:1px solid var(--border);font-weight:600}
+.alert-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.alert-table tr:last-child td{border-bottom:none}
+.alert-table tr:hover td{background:var(--surface2)}
+.tier-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.tier-green{background:var(--tier-green-bg);color:var(--tier-green)}
+.tier-amber{background:var(--tier-amber-bg);color:var(--tier-amber)}
+.tier-red{background:var(--tier-red-bg);color:var(--tier-red)}
+.tier-critical{background:var(--tier-critical-bg);color:var(--tier-critical)}
+.prob-bar-wrap{background:var(--surface2);border-radius:3px;height:4px;width:80px;margin-top:3px}
+.prob-bar{height:4px;border-radius:3px}
+
+.metric-row{display:flex;gap:10px;margin-bottom:16px}
+.metric-tile{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+.metric-tile .val{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums}
+.metric-tile .lbl{font-size:.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.metric-tile .sub{font-size:.72rem;color:var(--text-sub)}
+
+.epi-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+svg.chart{overflow:visible}
+
+.irr-table,.fold-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.irr-table th,.fold-table th{padding:8px 10px;text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sub);border-bottom:1px solid var(--border);font-weight:600}
+.irr-table td,.fold-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.irr-table tr:last-child td,.fold-table tr:last-child td{border-bottom:none}
+.irr-table tr:hover td,.fold-table tr:hover td{background:var(--surface2)}
+.sig-star{color:var(--tier-amber);font-weight:700}
+.pass{color:var(--tier-green)}.fail{color:var(--tier-red)}
+.dq-bar-wrap{background:var(--surface2);border-radius:3px;height:6px;width:100%}
+.dq-bar{height:6px;border-radius:3px}
+
+.footer{text-align:center;padding:20px;font-size:.72rem;color:var(--text-sub);border-top:1px solid var(--border);margin-top:32px}
+
+@media(max-width:900px){
+  .exec-grid,.epi-grid{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🦠</div>
+    <div class="logo-text">
+      <h1>SmartMpox Nigeria</h1>
+      <p>AI-Driven Early Warning System &middot; AIA4OneHealth</p>
+    </div>
+  </div>
+  <div class="header-spacer"></div>
+  <div class="view-toggle">
+    <button class="view-btn active" onclick="switchView('executive',this)">Executive</button>
+    <button class="view-btn" onclick="switchView('epidemiologist',this)">Epidemiologist</button>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme">&#127769;</button>
+  <span class="last-updated" id="last-updated">Loading&hellip;</span>
+</header>
+
+<div class="tooltip" id="tooltip"></div>
+
+<main class="main">
+
+  <!-- EXECUTIVE VIEW -->
+  <section class="view active" id="view-executive">
+    <div class="kpi-row" id="kpi-row"></div>
+    <div class="exec-grid">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Nigeria State Risk Map &mdash; 4-Week Outbreak Probability</span>
+          <span style="font-size:.72rem;color:var(--text-muted)" id="map-week-label"></span>
+        </div>
+        <svg id="nigeria-map" viewBox="0 0 520 440"></svg>
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-critical)"></div>Critical (&ge;34.5%)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-red)"></div>Red (20&ndash;34.5%)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-amber)"></div>Amber (8&ndash;20%)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--tier-green)"></div>Green (&lt;8%)</div>
+          <div class="legend-item" style="margin-left:auto"><div class="legend-dot" style="border:2px dashed var(--text-muted)"></div>Border state</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Alert Rankings</span>
+          <span style="font-size:.72rem;color:var(--text-muted)">All 37 states</span>
+        </div>
+        <div style="overflow-y:auto;max-height:540px">
+          <table class="alert-table">
+            <thead><tr><th>#</th><th>State</th><th>Tier</th><th>P(outbreak)</th></tr></thead>
+            <tbody id="alert-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EPIDEMIOLOGIST VIEW -->
+  <section class="view" id="view-epidemiologist">
+    <div class="metric-row" id="metric-row"></div>
+    <div class="epi-grid" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Walk-Forward Validation (XGBoost, 4-week horizon)</span></div>
+        <div style="padding:0">
+          <table class="fold-table">
+            <thead><tr><th>Fold</th><th>ROC-AUC</th><th>Sensitivity</th><th>FAR</th><th>KPI</th></tr></thead>
+            <tbody id="fold-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Annual Mpox Cases &mdash; Nigeria 2017&ndash;2024</span></div>
+        <div class="card-body"><svg id="cases-chart" class="chart" width="100%" height="240"></svg></div>
+      </div>
+    </div>
+    <div class="epi-grid" style="margin-bottom:16px">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Negative Binomial GLM &mdash; Incidence Rate Ratios</span>
+          <span style="font-size:.72rem;color:var(--text-muted)">Train 2017&ndash;2022 &middot; Val 2023</span>
+        </div>
+        <div style="padding:0">
+          <table class="irr-table">
+            <thead><tr><th>Predictor</th><th>IRR</th><th>95% CI</th><th>p-value</th><th>Sig</th></tr></thead>
+            <tbody id="irr-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Data Quality Scorecard</span>
+          <span style="font-size:.72rem;color:var(--text-muted)">P1 Warehouse &middot; 2026-08</span>
+        </div>
+        <div style="padding:0">
+          <table class="irr-table">
+            <thead><tr><th>Source</th><th>Completeness</th><th>Coverage</th><th>Consistency</th></tr></thead>
+            <tbody id="dq-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header">
+        <span class="card-title">Risk Tier Distribution by Year (% of state-weeks)</span>
+        <span style="font-size:.72rem;color:var(--text-muted)">37 states &times; 52 weeks &middot; XGBoost v1</span>
+      </div>
+      <div class="card-body"><svg id="tier-chart" class="chart" width="100%" height="200"></svg></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  SmartMpox Nigeria &middot; AI-Driven Mpox Early Warning System &middot; AIA4OneHealth Research Group &middot;
+  <a href="https://aia4onehealth.org" style="color:var(--accent);text-decoration:none">aia4onehealth.org</a>
+  &middot; XGBoost v1 &middot; 4-week horizon &middot; 37 states &middot; 2017&ndash;2024
+</footer>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────
+var SUPABASE_URL = "https://tspwkxyiralnukmefagl.supabase.co";
+var ANON_KEY     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcHdreHlpcmFsbnVrbWVmYWdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyMDMwNTYsImV4cCI6MjEwMTc3OTA1Nn0.Jcmy5vwAjybjv5rkWX6r5LHC0-9ulQtVuUX1bWiH70s";
+
+var TIER_ORDER = ["critical","red","amber","green"];
+var TIER_HEX_DARK  = {critical:"#a855f7",red:"#ef4444",amber:"#f59e0b",green:"#22c55e"};
+var TIER_HEX_LIGHT = {critical:"#7c3aed",red:"#dc2626",amber:"#d97706",green:"#16a34a"};
+
+// State centroids [lon, lat]
+var CENTROIDS = {
+  1:[7.52,5.45],2:[12.40,9.32],3:[7.86,4.94],4:[7.07,6.21],5:[9.85,10.31],
+  6:[6.07,4.65],7:[8.78,7.19],8:[13.16,11.83],9:[8.60,5.87],10:[5.67,5.89],
+  11:[8.10,6.27],12:[5.63,6.34],13:[5.31,7.73],14:[7.50,6.45],15:[7.17,8.89],
+  16:[11.17,10.28],17:[7.06,5.57],18:[9.35,12.18],19:[7.44,10.52],20:[8.52,11.99],
+  21:[7.61,12.99],22:[4.20,11.50],23:[6.73,7.50],24:[5.00,8.90],25:[3.38,6.52],
+  26:[8.55,8.50],27:[6.00,9.93],28:[3.35,6.99],29:[5.20,7.25],30:[4.56,7.78],
+  31:[3.93,7.85],32:[9.52,9.22],33:[6.99,4.86],34:[5.24,13.06],35:[11.37,7.87],
+  36:[11.40,12.12],37:[6.08,12.17]
+};
+
+// ── Static embedded data (build-time snapshot) ──────────────────
+var STATIC = {"generated_at": "2026-08-08", "states": {"1": {"name": "Abia", "border": false}, "2": {"name": "Adamawa", "border": true}, "3": {"name": "Akwa Ibom", "border": false}, "4": {"name": "Anambra", "border": false}, "5": {"name": "Bauchi", "border": false}, "6": {"name": "Bayelsa", "border": false}, "7": {"name": "Benue", "border": false}, "8": {"name": "Borno", "border": true}, "9": {"name": "Cross River", "border": true}, "10": {"name": "Delta", "border": false}, "11": {"name": "Ebonyi", "border": false}, "12": {"name": "Edo", "border": false}, "13": {"name": "Ekiti", "border": false}, "14": {"name": "Enugu", "border": false}, "15": {"name": "Gombe", "border": false}, "16": {"name": "Imo", "border": false}, "17": {"name": "Jigawa", "border": true}, "18": {"name": "Kaduna", "border": false}, "19": {"name": "Kano", "border": false}, "20": {"name": "Katsina", "border": true}, "21": {"name": "Kebbi", "border": true}, "22": {"name": "Kogi", "border": false}, "23": {"name": "Kwara", "border": false}, "24": {"name": "Lagos", "border": false}, "25": {"name": "Nasarawa", "border": false}, "26": {"name": "Niger", "border": false}, "27": {"name": "Ogun", "border": false}, "28": {"name": "Ondo", "border": false}, "29": {"name": "Osun", "border": false}, "30": {"name": "Oyo", "border": false}, "31": {"name": "Plateau", "border": false}, "32": {"name": "Rivers", "border": false}, "33": {"name": "Sokoto", "border": true}, "34": {"name": "Taraba", "border": true}, "35": {"name": "Yobe", "border": true}, "36": {"name": "Zamfara", "border": false}, "37": {"name": "FCT Abuja", "border": false}}, "latest_scores": [{"state_id": 1, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2007, "risk_tier": "red", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.6307, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.5825, "top_feature_3": "cases_rolling4w_mean", "top_feature_3_shap": -0.2695, "state_name": "Abia"}, {"state_id": 2, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0829, "risk_tier": "amber", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6165, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.6144, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.4038, "state_name": "Adamawa"}, {"state_id": 3, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.1107, "risk_tier": "amber", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6469, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.4499, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.3635, "state_name": "Akwa Ibom"}, {"state_id": 4, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.1653, "risk_tier": "amber", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6181, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.5755, "top_feature_3": "cases_rolling8w_mean", "top_feature_3_shap": -0.4155, "state_name": "Anambra"}, {"state_id": 5, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0392, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1286, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.7073, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.4677, "state_name": "Bauchi"}, {"state_id": 6, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0826, "risk_tier": "amber", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6119, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.522, "top_feature_3": "cases_rolling8w_mean", "top_feature_3_shap": -0.4564, "state_name": "Bayelsa"}, {"state_id": 7, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2214, "risk_tier": "red", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.5943, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.4102, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.3756, "state_name": "Benue"}, {"state_id": 8, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.035, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1326, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.6809, "top_feature_3": "week_cos", "top_feature_3_shap": -0.4839, "state_name": "Borno"}, {"state_id": 9, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.1035, "risk_tier": "amber", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6246, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.4348, "top_feature_3": "cases_rolling8w_mean", "top_feature_3_shap": -0.4228, "state_name": "Cross River"}, {"state_id": 10, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.1162, "risk_tier": "amber", "top_feature_1": "rainfall_t4_mm", "top_feature_1_shap": -0.5174, "top_feature_2": "neighbour_cases_t1", "top_feature_2_shap": -0.419, "top_feature_3": "cases_rolling4w_mean", "top_feature_3_shap": -0.3578, "state_name": "Delta"}, {"state_id": 11, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2131, "risk_tier": "red", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6002, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.4549, "top_feature_3": "cases_rolling8w_mean", "top_feature_3_shap": -0.4291, "state_name": "Ebonyi"}, {"state_id": 12, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0571, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6719, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.4943, "top_feature_3": "cases_rolling8w_mean", "top_feature_3_shap": -0.4748, "state_name": "Edo"}, {"state_id": 13, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.055, "risk_tier": "green", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.6586, "top_feature_2": "temp_mean_t1_c", "top_feature_2_shap": -0.6106, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.4734, "state_name": "Ekiti"}, {"state_id": 14, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2131, "risk_tier": "red", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6005, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.4549, "top_feature_3": "cases_rolling8w_mean", "top_feature_3_shap": -0.4291, "state_name": "Enugu"}, {"state_id": 15, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0403, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1216, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.7184, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.4676, "state_name": "Gombe"}, {"state_id": 16, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.178, "risk_tier": "amber", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -0.6239, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.5519, "top_feature_3": "cases_rolling8w_mean", "top_feature_3_shap": -0.4206, "state_name": "Imo"}, {"state_id": 17, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0372, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1284, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.6826, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.427, "state_name": "Jigawa"}, {"state_id": 18, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0403, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1207, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.7184, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.4676, "state_name": "Kaduna"}, {"state_id": 19, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0403, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1207, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.7184, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.4676, "state_name": "Kano"}, {"state_id": 20, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0337, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1501, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.7013, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.5356, "state_name": "Katsina"}, {"state_id": 21, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0372, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1396, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.6808, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.4316, "state_name": "Kebbi"}, {"state_id": 22, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.3466, "risk_tier": "critical", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.5614, "top_feature_2": "week_cos", "top_feature_2_shap": 0.4983, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.3876, "state_name": "Kogi"}, {"state_id": 23, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2292, "risk_tier": "red", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.6549, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.4671, "top_feature_3": "week_cos", "top_feature_3_shap": 0.2989, "state_name": "Kwara"}, {"state_id": 24, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0514, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.3035, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.584, "top_feature_3": "cases_rolling8w_mean", "top_feature_3_shap": 0.5078, "state_name": "Lagos"}, {"state_id": 25, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2326, "risk_tier": "red", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.611, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.4111, "top_feature_3": "cases_rolling4w_mean", "top_feature_3_shap": -0.276, "state_name": "Nasarawa"}, {"state_id": 26, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0486, "risk_tier": "green", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.6739, "top_feature_2": "temp_mean_t1_c", "top_feature_2_shap": -0.6211, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.4749, "state_name": "Niger"}, {"state_id": 27, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0735, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.0102, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.4692, "top_feature_3": "neighbour_cases_t1", "top_feature_3_shap": -0.4173, "state_name": "Ogun"}, {"state_id": 28, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2205, "risk_tier": "red", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.5933, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.323, "top_feature_3": "temp_mean_t1_c", "top_feature_3_shap": -0.2995, "state_name": "Ondo"}, {"state_id": 29, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2306, "risk_tier": "red", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.6364, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.3777, "top_feature_3": "temp_mean_t1_c", "top_feature_3_shap": -0.3143, "state_name": "Osun"}, {"state_id": 30, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.3329, "risk_tier": "red", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.5777, "top_feature_2": "week_cos", "top_feature_2_shap": 0.4737, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.3777, "state_name": "Oyo"}, {"state_id": 31, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0515, "risk_tier": "green", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.6741, "top_feature_2": "temp_mean_t1_c", "top_feature_2_shap": -0.6192, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.5016, "state_name": "Plateau"}, {"state_id": 32, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0437, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.057, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.5247, "top_feature_3": "week_cos", "top_feature_3_shap": -0.4787, "state_name": "Rivers"}, {"state_id": 33, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0337, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1501, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.7013, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.5356, "state_name": "Sokoto"}, {"state_id": 34, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.3515, "risk_tier": "critical", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.5566, "top_feature_2": "week_cos", "top_feature_2_shap": 0.5291, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.3862, "state_name": "Taraba"}, {"state_id": 35, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0337, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1501, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.7013, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.5356, "state_name": "Yobe"}, {"state_id": 36, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.0355, "risk_tier": "green", "top_feature_1": "temp_mean_t1_c", "top_feature_1_shap": -1.1454, "top_feature_2": "cases_rolling8w_mean", "top_feature_2_shap": -0.7292, "top_feature_3": "rainfall_t4_mm", "top_feature_3_shap": -0.5727, "state_name": "Zamfara"}, {"state_id": 37, "epi_year": 2024, "epi_week": 52, "week_start_date": "2024-12-23", "risk_prob": 0.2292, "risk_tier": "red", "top_feature_1": "cases_rolling8w_mean", "top_feature_1_shap": -0.6605, "top_feature_2": "rainfall_t4_mm", "top_feature_2_shap": -0.4634, "top_feature_3": "week_cos", "top_feature_3_shap": 0.2989, "state_name": "FCT Abuja"}], "annual_cases": [{"year": 2018, "total": 10, "confirmed": 0, "states": 3}, {"year": 2019, "total": 37, "confirmed": 0, "states": 9}, {"year": 2021, "total": 463, "confirmed": 0, "states": 2}, {"year": 2022, "total": 3549, "confirmed": 0, "states": 34}, {"year": 2023, "total": 739, "confirmed": 0, "states": 33}, {"year": 2024, "total": 51, "confirmed": 51, "states": 20}], "weekly_trend": [{"year": 2022, "week": 4, "cases": 6}, {"year": 2022, "week": 8, "cases": 5}, {"year": 2022, "week": 17, "cases": 95}, {"year": 2022, "week": 21, "cases": 108}, {"year": 2022, "week": 22, "cases": 100}, {"year": 2022, "week": 23, "cases": 100}, {"year": 2022, "week": 24, "cases": 102}, {"year": 2022, "week": 25, "cases": 41}, {"year": 2022, "week": 26, "cases": 40}, {"year": 2022, "week": 27, "cases": 55}, {"year": 2022, "week": 28, "cases": 242}, {"year": 2022, "week": 29, "cases": 249}, {"year": 2022, "week": 30, "cases": 258}, {"year": 2022, "week": 31, "cases": 230}, {"year": 2022, "week": 32, "cases": 231}, {"year": 2022, "week": 33, "cases": 73}, {"year": 2022, "week": 34, "cases": 254}, {"year": 2022, "week": 35, "cases": 110}, {"year": 2022, "week": 37, "cases": 396}, {"year": 2022, "week": 38, "cases": 55}, {"year": 2022, "week": 39, "cases": 51}, {"year": 2022, "week": 40, "cases": 58}, {"year": 2022, "week": 41, "cases": 63}, {"year": 2022, "week": 42, "cases": 63}, {"year": 2022, "week": 43, "cases": 63}, {"year": 2022, "week": 45, "cases": 45}, {"year": 2022, "week": 46, "cases": 211}, {"year": 2022, "week": 47, "cases": 46}, {"year": 2022, "week": 48, "cases": 45}, {"year": 2022, "week": 49, "cases": 57}, {"year": 2022, "week": 50, "cases": 33}, {"year": 2022, "week": 51, "cases": 38}, {"year": 2022, "week": 52, "cases": 26}, {"year": 2023, "week": 2, "cases": 23}, {"year": 2023, "week": 3, "cases": 27}, {"year": 2023, "week": 4, "cases": 27}, {"year": 2023, "week": 5, "cases": 45}, {"year": 2023, "week": 6, "cases": 16}, {"year": 2023, "week": 7, "cases": 33}, {"year": 2023, "week": 8, "cases": 15}, {"year": 2023, "week": 9, "cases": 14}, {"year": 2023, "week": 10, "cases": 17}, {"year": 2023, "week": 11, "cases": 10}, {"year": 2023, "week": 12, "cases": 19}, {"year": 2023, "week": 13, "cases": 15}, {"year": 2023, "week": 14, "cases": 14}, {"year": 2023, "week": 15, "cases": 14}, {"year": 2023, "week": 16, "cases": 18}, {"year": 2023, "week": 17, "cases": 18}, {"year": 2023, "week": 18, "cases": 14}, {"year": 2023, "week": 19, "cases": 25}, {"year": 2023, "week": 20, "cases": 10}, {"year": 2023, "week": 21, "cases": 14}, {"year": 2023, "week": 22, "cases": 20}, {"year": 2023, "week": 23, "cases": 15}, {"year": 2023, "week": 24, "cases": 18}, {"year": 2023, "week": 25, "cases": 10}, {"year": 2023, "week": 26, "cases": 5}, {"year": 2023, "week": 27, "cases": 12}, {"year": 2023, "week": 28, "cases": 9}, {"year": 2023, "week": 29, "cases": 16}, {"year": 2023, "week": 31, "cases": 9}, {"year": 2023, "week": 32, "cases": 12}, {"year": 2023, "week": 33, "cases": 7}, {"year": 2023, "week": 34, "cases": 10}, {"year": 2023, "week": 35, "cases": 8}, {"year": 2023, "week": 36, "cases": 5}, {"year": 2023, "week": 37, "cases": 2}, {"year": 2023, "week": 38, "cases": 10}, {"year": 2023, "week": 39, "cases": 7}, {"year": 2023, "week": 40, "cases": 15}, {"year": 2023, "week": 41, "cases": 4}, {"year": 2023, "week": 42, "cases": 17}, {"year": 2023, "week": 43, "cases": 11}, {"year": 2023, "week": 44, "cases": 17}, {"year": 2023, "week": 45, "cases": 25}, {"year": 2023, "week": 46, "cases": 11}, {"year": 2023, "week": 47, "cases": 18}, {"year": 2023, "week": 48, "cases": 17}, {"year": 2023, "week": 49, "cases": 20}, {"year": 2023, "week": 50, "cases": 15}, {"year": 2023, "week": 51, "cases": 4}, {"year": 2023, "week": 52, "cases": 2}, {"year": 2024, "week": 34, "cases": 8}, {"year": 2024, "week": 36, "cases": 9}, {"year": 2024, "week": 39, "cases": 6}, {"year": 2024, "week": 41, "cases": 8}, {"year": 2024, "week": 42, "cases": 6}, {"year": 2024, "week": 43, "cases": 8}, {"year": 2024, "week": 44, "cases": 6}], "tier_by_year": {"2017": {"amber": 402, "critical": 123, "green": 1212, "red": 113}, "2018": {"amber": 401, "critical": 144, "green": 1259, "red": 120}, "2019": {"amber": 388, "critical": 170, "green": 1248, "red": 118}, "2020": {"amber": 379, "critical": 94, "green": 1370, "red": 118}, "2021": {"amber": 388, "critical": 157, "green": 1281, "red": 98}, "2022": {"amber": 194, "critical": 725, "green": 866, "red": 139}, "2023": {"amber": 385, "critical": 544, "green": 790, "red": 205}, "2024": {"amber": 403, "critical": 148, "green": 1217, "red": 156}}, "dq_scores": [{"source": "NCDC Weekly Situation Reports", "completeness": 100.0, "coverage": 100.0, "consistency": 16.52, "year": 2026, "month": 8}, {"source": "Our World in Data — Mpox Dataset", "completeness": 100.0, "coverage": 100.0, "consistency": 16.52, "year": 2026, "month": 8}, {"source": "Global.health Mpox Linelist", "completeness": 40.11, "coverage": 94.59, "consistency": null, "year": 2026, "month": 8}, {"source": "GBIF Rodent Occurrence Records", "completeness": 56.76, "coverage": 56.76, "consistency": null, "year": 2026, "month": 8}], "irr_table": {"cases_t1": {"irr": 1.1532548305213581, "lo95": 1.1457853513161385, "hi95": 1.1607730039427617, "pvalue": 0.0, "significant": true}, "cases_velocity": {"irr": 0.9073771187154549, "lo95": 0.9027567322572042, "hi95": 0.9120211527082637, "pvalue": 8.804643903913414e-305, "significant": true}, "rainfall_t2_mm": {"irr": 1.014115130169613, "lo95": 1.0127789368974078, "hi95": 1.0154530863264872, "pvalue": 2.0356091585346088e-96, "significant": true}, "temp_mean_t1_c": {"irr": 0.8368052014157501, "lo95": 0.8086219072273123, "hi95": 0.865970781718641, "pvalue": 2.1409760038478117e-24, "significant": true}, "reservoir_risk_index": {"irr": 4.49118342940781, "lo95": 3.6913270491630064, "hi95": 5.464356944790609, "pvalue": 6.228343575745017e-51, "significant": true}, "is_border_state": {"irr": 0.3766481368427292, "lo95": 0.311196066522775, "hi95": 0.45586636287614174, "pvalue": 1.1748519292338507e-23, "significant": true}, "neighbour_cases_t1": {"irr": 1.0221430695952027, "lo95": 1.0193396473289311, "hi95": 1.0249542019279119, "pvalue": 4.575509617054323e-55, "significant": true}, "week_sin": {"irr": 1.2090304958679485, "lo95": 1.0992608892176936, "hi95": 1.3297614372316826, "pvalue": 9.277407888010544e-05, "significant": true}, "week_cos": {"irr": 0.5178521349940354, "lo95": 0.4768035725297617, "hi95": 0.5624346149401842, "pvalue": 5.521415346334671e-55, "significant": true}}, "backtest": {"mean_roc_auc": 0.7266, "mean_sensitivity": 0.2078, "mean_far": 0.0639, "mean_pr_auc": 0.1556, "n_folds": 4, "folds": [{"fold": "train≤2019→test=2020", "train_n": 5698, "train_pos": 17, "test_n": 1961, "test_pos": 0, "roc_auc": null, "pr_auc": null, "threshold": 0.9881, "sensitivity": 0, "specificity": 0.9995, "ppv": 0.0, "false_alarm_rate": 0.0005, "tp": 0, "fp": 1, "fn": 0, "tn": 1960, "skipped": false}, {"fold": "train≤2020→test=2021", "train_n": 7659, "train_pos": 17, "test_n": 1924, "test_pos": 15, "roc_auc": 0.7135, "pr_auc": 0.0283, "threshold": 0.9913, "sensitivity": 0.0, "specificity": 1.0, "ppv": 0, "false_alarm_rate": 0.0, "tp": 0, "fp": 0, "fn": 15, "tn": 1909, "skipped": false}, {"fold": "train≤2021→test=2022", "train_n": 9583, "train_pos": 32, "test_n": 1924, "test_pos": 263, "roc_auc": 0.702, "pr_auc": 0.2652, "threshold": 0.9626, "sensitivity": 0.0, "specificity": 0.9994, "ppv": 0.0, "false_alarm_rate": 0.0006, "tp": 0, "fp": 1, "fn": 263, "tn": 1660, "skipped": false}, {"fold": "train≤2022→test=2023", "train_n": 11507, "train_pos": 295, "test_n": 1924, "test_pos": 187, "roc_auc": 0.7339, "pr_auc": 0.2798, "threshold": 0.519, "sensitivity": 0.4813, "specificity": 0.852, "ppv": 0.2594, "false_alarm_rate": 0.148, "tp": 90, "fp": 257, "fn": 97, "tn": 1480, "skipped": false}, {"fold": "train≤2023→test=2024", "train_n": 13431, "train_pos": 482, "test_n": 1924, "test_pos": 40, "roc_auc": 0.7572, "pr_auc": 0.0491, "threshold": 0.4007, "sensitivity": 0.35, "specificity": 0.8928, "ppv": 0.0648, "false_alarm_rate": 0.1072, "tp": 14, "fp": 202, "fn": 26, "tn": 1682, "skipped": false}]}};
+
+// ── Runtime data ────────────────────────────────────────────────
+var DATA = null;
+
+// ── Theme ───────────────────────────────────────────────────────
+function toggleTheme() {
+  var html = document.documentElement;
+  var next = html.dataset.theme === "dark" ? "light" : "dark";
+  html.dataset.theme = next;
+  document.querySelector(".theme-btn").textContent = next === "dark" ? "\u{1F319}" : "☀️";
+  if (DATA) renderMap();
+}
+
+// ── View switch ─────────────────────────────────────────────────
+function switchView(id, btn) {
+  document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
+  document.querySelectorAll(".view-btn").forEach(function(b){ b.classList.remove("active"); });
+  document.getElementById("view-"+id).classList.add("active");
+  if (btn) btn.classList.add("active");
+  if (id === "epidemiologist" && DATA) renderEpiView();
+}
+
+// ── Live Supabase fetch ──────────────────────────────────────────
+function sbFetch(path) {
+  return fetch(SUPABASE_URL+"/rest/v1/"+path, {
+    headers: { "apikey": ANON_KEY, "Authorization": "Bearer "+ANON_KEY }
+  }).then(function(r){ return r.ok ? r.json() : Promise.reject(r.statusText); });
+}
+
+function loadLiveData() {
+  return Promise.all([
+    sbFetch("latest_risk_scores?select=state_id,epi_year,epi_week,week_start_date,risk_prob,risk_tier,top_feature_1,top_feature_1_shap,top_feature_2,top_feature_3"),
+    sbFetch("ref_states?select=state_id,state_name,is_border_state"),
+    sbFetch("surveillance_weekly?select=epi_year,confirmed,suspected,probable&order=epi_year.asc")
+  ]).then(function(results) {
+    var scores = results[0], states = results[1], surv = results[2];
+
+    var stateMap = {};
+    states.forEach(function(s){ stateMap[s.state_id] = {name:s.state_name, border:s.is_border_state}; });
+    scores.forEach(function(s){ s.state_name = (stateMap[s.state_id]||{}).name || "State "+s.state_id; });
+
+    var annualMap = {};
+    surv.forEach(function(r){
+      var y = r.epi_year;
+      if (!annualMap[y]) annualMap[y] = {year:y, total:0, confirmed:0};
+      annualMap[y].total     += (r.confirmed||0)+(r.suspected||0)+(r.probable||0);
+      annualMap[y].confirmed += (r.confirmed||0);
+    });
+    var annualCases = Object.values(annualMap).sort(function(a,b){ return a.year-b.year; });
+
+    return { latest_scores: scores, states: stateMap, annual_cases: annualCases };
+  }).catch(function(e){
+    console.warn("Live fetch failed:", e, "-- using embedded data");
+    return null;
+  });
+}
+
+// ── KPI Tiles ───────────────────────────────────────────────────
+function renderKPI() {
+  var scores = DATA.latest_scores || [];
+  var critical = scores.filter(function(s){ return s.risk_tier==="critical"; }).length;
+  var highRisk = scores.filter(function(s){ return s.risk_tier==="critical"||s.risk_tier==="red"; }).length;
+  var bt = DATA.backtest || {};
+  var meanAUC = bt.mean_roc_auc ? bt.mean_roc_auc.toFixed(3) : "0.727";
+  var folds = (bt.folds||[]).filter(function(f){ return f.roc_auc !== null && f.roc_auc !== undefined; });
+  var bestAUC = folds.length ? Math.max.apply(null, folds.map(function(f){ return f.roc_auc; })).toFixed(3) : "0.757";
+
+  document.getElementById("kpi-row").innerHTML =
+    kpiCard("critical","Critical States", critical, "Outbreak P ≥ 34.5%")+
+    kpiCard("red","High-Risk States", highRisk, "Red + Critical tiers")+
+    kpiCard("blue","Prediction Horizon","28 <span style='font-size:1rem;font-weight:400'>days</span>","4-week forward outlook")+
+    kpiCard("green","Best-Fold ROC-AUC", bestAUC, "Mean across folds: "+meanAUC);
+}
+function kpiCard(cls,lbl,val,sub){
+  return '<div class="kpi-card '+cls+'">'
+    +'<div class="kpi-label">'+lbl+'</div>'
+    +'<div class="kpi-value">'+val+'</div>'
+    +'<div class="kpi-sub">'+sub+'</div></div>';
+}
+
+// ── Alert Table ─────────────────────────────────────────────────
+function renderAlertTable() {
+  var scores = (DATA.latest_scores||[]).slice().sort(function(a,b){ return b.risk_prob-a.risk_prob; });
+  document.getElementById("alert-tbody").innerHTML = scores.map(function(s,i){
+    var pct = (s.risk_prob*100).toFixed(1);
+    var feat = s.top_feature_1 ? s.top_feature_1.replace(/_/g," ") : "";
+    var col = (document.documentElement.dataset.theme==="light"?TIER_HEX_LIGHT:TIER_HEX_DARK)[s.risk_tier]||"#666";
+    return "<tr>"
+      +"<td style='color:var(--text-sub);font-size:.72rem'>"+(i+1)+"</td>"
+      +"<td><strong>"+s.state_name+"</strong></td>"
+      +"<td><span class='tier-badge tier-"+s.risk_tier+"'>"+s.risk_tier+"</span></td>"
+      +"<td>"
+        +"<div style='font-variant-numeric:tabular-nums;font-size:.82rem'>"+pct+"%</div>"
+        +"<div class='prob-bar-wrap'><div class='prob-bar' style='width:"+Math.min(pct,100)+"%;background:"+col+"'></div></div>"
+        +"<div style='font-size:.68rem;color:var(--text-sub);margin-top:2px'>"+feat+"</div>"
+      +"</td></tr>";
+  }).join("");
+}
+
+// ── Nigeria Map ─────────────────────────────────────────────────
+function renderMap() {
+  if (!DATA) return;
+  var svg = document.getElementById("nigeria-map");
+  var VW = 520, VH = 440, PAD = 32;
+
+  var lons = Object.values(CENTROIDS).map(function(c){ return c[0]; });
+  var lats = Object.values(CENTROIDS).map(function(c){ return c[1]; });
+  var lonMin=Math.min.apply(null,lons)-0.8, lonMax=Math.max.apply(null,lons)+0.8;
+  var latMin=Math.min.apply(null,lats)-0.8, latMax=Math.max.apply(null,lats)+0.8;
+
+  function px(lon){ return PAD+(lon-lonMin)/(lonMax-lonMin)*(VW-PAD*2); }
+  function py(lat){ return (VH-PAD)-(lat-latMin)/(latMax-latMin)*(VH-PAD*2); }
+
+  var scoreMap = {};
+  (DATA.latest_scores||[]).forEach(function(s){ scoreMap[s.state_id]=s; });
+
+  var isDark = document.documentElement.dataset.theme !== "light";
+  var HEX = isDark ? TIER_HEX_DARK : TIER_HEX_LIGHT;
+
+  var html = '<rect width="'+VW+'" height="'+VH+'" fill="transparent"/>';
+
+  Object.keys(CENTROIDS).forEach(function(sid){
+    var id = parseInt(sid);
+    var s  = scoreMap[id];
+    if (!s) return;
+    var lon = CENTROIDS[sid][0], lat = CENTROIDS[sid][1];
+    var x = px(lon), y = py(lat);
+    var col = HEX[s.risk_tier] || "#666";
+    var r = 13 + s.risk_prob * 8;
+    var name = s.state_name || "State "+id;
+    var abbr = name.length > 7 ? name.substring(0,6) : name;
+    var stateInfo = (DATA.states||{})[id] || {};
+    var isBorder = stateInfo.border;
+
+    html += '<g class="state-bubble" style="cursor:pointer"'
+      +' onmouseenter="showTT(event,'+id+')" onmouseleave="hideTT()">'
+      +'<circle cx="'+x+'" cy="'+y+'" r="'+r+'"'
+      +' fill="'+col+'" fill-opacity="0.82"'
+      +' stroke="'+(isBorder?"#fff":col)+'"'
+      +' stroke-width="'+(isBorder?"2":"1")+'"'
+      +' stroke-dasharray="'+(isBorder?"5 3":"none")+'"/>'
+      +'<text x="'+x+'" y="'+(y+3.5)+'" text-anchor="middle"'
+      +' font-size="7" fill="white" font-weight="600" pointer-events="none">'+abbr+'</text>'
+      +'</g>';
+  });
+
+  svg.innerHTML = html;
+
+  var first = (DATA.latest_scores||[])[0];
+  if (first) document.getElementById("map-week-label").textContent="Epi Week "+first.epi_week+", "+first.epi_year;
+}
+
+// ── Tooltip ──────────────────────────────────────────────────────
+function showTT(e, sid) {
+  if (!DATA) return;
+  var s = (DATA.latest_scores||[]).filter(function(x){ return x.state_id===sid; })[0];
+  if (!s) return;
+  var pct = (s.risk_prob*100).toFixed(1);
+  var feat = s.top_feature_1 ? s.top_feature_1.replace(/_/g," ") : "—";
+  var shap = s.top_feature_1_shap ? parseFloat(s.top_feature_1_shap).toFixed(3) : "";
+  var tt = document.getElementById("tooltip");
+  tt.innerHTML = "<div class='tt-name'>"+s.state_name+"</div>"
+    +"<div class='tt-row'><span>Tier</span><span class='tt-value tier-badge tier-"+s.risk_tier+"' style='padding:1px 6px'>"+s.risk_tier+"</span></div>"
+    +"<div class='tt-row'><span>P(outbreak 4w)</span><span class='tt-value'>"+pct+"%</span></div>"
+    +(feat?"<div class='tt-row'><span>Top driver</span><span class='tt-value'>"+feat+"</span></div>":"")
+    +(shap?"<div class='tt-row'><span>SHAP</span><span class='tt-value'>"+shap+"</span></div>":"")
+    +"<div class='tt-row'><span>Week</span><span class='tt-value'>W"+s.epi_week+" "+s.epi_year+"</span></div>";
+  tt.style.display="block";
+  positionTT(e);
+}
+function positionTT(e){
+  var tt=document.getElementById("tooltip");
+  tt.style.left=Math.min(e.clientX+14,window.innerWidth-260)+"px";
+  tt.style.top=Math.max(e.clientY-tt.offsetHeight/2,4)+"px";
+}
+function hideTT(){ document.getElementById("tooltip").style.display="none"; }
+document.getElementById("nigeria-map").addEventListener("mousemove",positionTT);
+
+// ── Epi: Metric Tiles ────────────────────────────────────────────
+function renderMetrics() {
+  var bt = DATA.backtest || {};
+  var folds = (bt.folds||[]).filter(function(f){ return f.roc_auc!==null&&f.roc_auc!==undefined; });
+  var bestFold = folds.reduce(function(best,f){ return (!best||f.roc_auc>best.roc_auc)?f:best; }, null);
+  var tiles = [
+    {val: bt.mean_roc_auc?bt.mean_roc_auc.toFixed(3):"0.727", lbl:"Mean ROC-AUC", sub:"4-fold walk-forward"},
+    {val: bestFold?(bestFold.sensitivity*100).toFixed(1)+"%":"48.1%", lbl:"Best-Fold Sensitivity", sub:"Train≤2022, Test=2023"},
+    {val: bt.mean_far?(bt.mean_far*100).toFixed(1)+"%":"6.4%", lbl:"False Alarm Rate", sub:"KPI target ≤20% ✓"},
+    {val:"9/9", lbl:"NB Sig. Predictors", sub:"p<0.001 each · KPI-5 ✓"},
+    {val:"28 days", lbl:"Lead Time", sub:"4-week horizon · KPI ≥7d ✓"}
+  ];
+  document.getElementById("metric-row").innerHTML = tiles.map(function(m){
+    return "<div class='metric-tile'><div class='val'>"+m.val+"</div><div class='lbl'>"+m.lbl+"</div><div class='sub'>"+m.sub+"</div></div>";
+  }).join("");
+}
+
+// ── Epi: Fold Table ──────────────────────────────────────────────
+function renderFolds() {
+  var folds = (DATA.backtest||{}).folds||[];
+  document.getElementById("fold-tbody").innerHTML = folds.map(function(f){
+    if (f.roc_auc===null||f.roc_auc===undefined)
+      return "<tr><td style='font-size:.72rem'>"+f.fold+"</td><td colspan='4' style='color:var(--text-sub);font-size:.72rem'>Skipped — insufficient positives in test set</td></tr>";
+    var pass = f.roc_auc >= 0.80;
+    return "<tr>"
+      +"<td style='font-size:.74rem'>"+f.fold+"</td>"
+      +"<td>"+f.roc_auc.toFixed(3)+"</td>"
+      +"<td>"+(f.sensitivity!==undefined?(f.sensitivity*100).toFixed(1)+"%":"—")+"</td>"
+      +"<td>"+(f.false_alarm_rate!==undefined?(f.false_alarm_rate*100).toFixed(1)+"%":"—")+"</td>"
+      +"<td class='"+(pass?"pass":"fail")+"'>"+(pass?"&#10003; PASS":"&#10007; FAIL")+"</td></tr>";
+  }).join("");
+}
+
+// ── Epi: Cases Bar Chart ─────────────────────────────────────────
+function renderCasesChart() {
+  var data = (DATA.annual_cases||[]).filter(function(r){ return r.year>=2017; });
+  if (!data.length) return;
+  var el = document.getElementById("cases-chart");
+  var W = el.parentElement.offsetWidth-32||400, H=220;
+  var PL=52,PR=20,PT=20,PB=40;
+  var cW=W-PL-PR, cH=H-PT-PB;
+  var maxV=Math.max.apply(null,data.map(function(r){ return r.total; }),10);
+  var bW=cW/data.length*0.58;
+  el.setAttribute("width",W); el.setAttribute("height",H); el.setAttribute("viewBox","0 0 "+W+" "+H);
+
+  var isDark=document.documentElement.dataset.theme!=="light";
+  var bC=isDark?"#58a6ff":"#2563eb", cC=isDark?"#22c55e":"#16a34a";
+  var tC=isDark?"#8b949e":"#64748b", gC=isDark?"#30363d":"#e2e8f0";
+
+  var s="";
+  [0,0.25,0.5,0.75,1].forEach(function(f){
+    var y=PT+cH-f*cH, v=Math.round(f*maxV);
+    s+='<line x1="'+PL+'" y1="'+y+'" x2="'+(PL+cW)+'" y2="'+y+'" stroke="'+gC+'" stroke-width="1"/>';
+    s+='<text x="'+(PL-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="'+tC+'">'+v+'</text>';
+  });
+  data.forEach(function(r,i){
+    var x=PL+(i+0.5)*cW/data.length-bW/2;
+    var yT=PT+cH-(r.total/maxV)*cH, hT=(r.total/maxV)*cH;
+    var yC=PT+cH-(r.confirmed/maxV)*cH, hC=(r.confirmed/maxV)*cH;
+    s+='<rect x="'+x+'" y="'+yT+'" width="'+bW+'" height="'+hT+'" fill="'+bC+'" rx="3" opacity="0.82"/>';
+    if(r.confirmed>0) s+='<rect x="'+x+'" y="'+yC+'" width="'+bW+'" height="'+hC+'" fill="'+cC+'" rx="3" opacity="0.9"/>';
+    s+='<text x="'+(x+bW/2)+'" y="'+(PT+cH+16)+'" text-anchor="middle" font-size="10" fill="'+tC+'">'+r.year+'</text>';
+    if(r.total>0) s+='<text x="'+(x+bW/2)+'" y="'+(yT-4)+'" text-anchor="middle" font-size="9" fill="'+tC+'">'+r.total+'</text>';
+  });
+  s+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+cH)+'" stroke="'+gC+'" stroke-width="1.5"/>';
+  s+='<line x1="'+PL+'" y1="'+(PT+cH)+'" x2="'+(PL+cW)+'" y2="'+(PT+cH)+'" stroke="'+gC+'" stroke-width="1.5"/>';
+  s+='<rect x="'+PL+'" y="'+(H-12)+'" width="10" height="10" fill="'+bC+'" rx="2"/>';
+  s+='<text x="'+(PL+14)+'" y="'+(H-3)+'" font-size="9" fill="'+tC+'">All cases (suspected+confirmed)</text>';
+  s+='<rect x="'+(PL+160)+'" y="'+(H-12)+'" width="10" height="10" fill="'+cC+'" rx="2"/>';
+  s+='<text x="'+(PL+174)+'" y="'+(H-3)+'" font-size="9" fill="'+tC+'">Confirmed only</text>';
+  el.innerHTML=s;
+}
+
+// ── Epi: Tier Stacked Bar ────────────────────────────────────────
+function renderTierChart() {
+  var tby=DATA.tier_by_year||{};
+  var years=Object.keys(tby).sort();
+  if (!years.length) return;
+  var el=document.getElementById("tier-chart");
+  var W=el.parentElement.offsetWidth-32||600,H=190;
+  var PL=40,PR=140,PT=10,PB=35;
+  var cW=W-PL-PR,cH=H-PT-PB,bW=cW/years.length*0.58;
+  el.setAttribute("width",W);el.setAttribute("height",H);el.setAttribute("viewBox","0 0 "+W+" "+H);
+
+  var isDark=document.documentElement.dataset.theme!=="light";
+  var HEX=isDark?TIER_HEX_DARK:TIER_HEX_LIGHT;
+  var tC=isDark?"#8b949e":"#64748b",gC=isDark?"#30363d":"#e2e8f0";
+
+  var s="";
+  [0,25,50,75,100].forEach(function(f){
+    var y=PT+cH-f/100*cH;
+    s+='<line x1="'+PL+'" y1="'+y+'" x2="'+(PL+cW)+'" y2="'+y+'" stroke="'+gC+'" stroke-width="1"/>';
+    s+='<text x="'+(PL-5)+'" y="'+(y+4)+'" text-anchor="end" font-size="9" fill="'+tC+'">'+f+'%</text>';
+  });
+  years.forEach(function(yr,i){
+    var row=tby[yr]||{};
+    var total=TIER_ORDER.reduce(function(sm,t){ return sm+(row[t]||0); },0);
+    if (!total) return;
+    var x=PL+(i+0.5)*cW/years.length-bW/2, yOff=PT+cH;
+    TIER_ORDER.slice().reverse().forEach(function(tier){
+      var n=row[tier]||0, h=(n/total)*cH;
+      if (h>0) { yOff-=h; s+='<rect x="'+x+'" y="'+yOff+'" width="'+bW+'" height="'+h+'" fill="'+HEX[tier]+'" opacity="0.88"/>'; }
+    });
+    s+='<text x="'+(x+bW/2)+'" y="'+(PT+cH+16)+'" text-anchor="middle" font-size="10" fill="'+tC+'">'+yr+'</text>';
+  });
+  s+='<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+cH)+'" stroke="'+gC+'" stroke-width="1.5"/>';
+  s+='<line x1="'+PL+'" y1="'+(PT+cH)+'" x2="'+(PL+cW)+'" y2="'+(PT+cH)+'" stroke="'+gC+'" stroke-width="1.5"/>';
+  var lx=PL+cW+12;
+  TIER_ORDER.forEach(function(t,i){
+    var ly=PT+i*22;
+    s+='<rect x="'+lx+'" y="'+ly+'" width="12" height="12" fill="'+HEX[t]+'" rx="3"/>';
+    s+='<text x="'+(lx+16)+'" y="'+(ly+10)+'" font-size="10" fill="'+tC+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</text>';
+  });
+  el.innerHTML=s;
+}
+
+// ── Epi: IRR Table ────────────────────────────────────────────────
+function renderIRR() {
+  var irr=DATA.irr_table||{};
+  var LABELS={cases_t1:"Cases (t-1)",cases_velocity:"Case velocity",rainfall_t2_mm:"Rainfall (t-2, mm)",temp_mean_t1_c:"Temperature (t-1, °C)",reservoir_risk_index:"Reservoir risk index",is_border_state:"Border state",neighbour_cases_t1:"Neighbour cases (t-1)",week_sin:"Seasonality (sin)",week_cos:"Seasonality (cos)"};
+  var sorted=Object.entries(irr).sort(function(a,b){ return b[1].irr-a[1].irr; });
+  document.getElementById("irr-tbody").innerHTML=sorted.map(function(entry){
+    var k=entry[0],v=entry[1];
+    var sig=v.pvalue<0.001?"***":v.pvalue<0.01?"**":v.pvalue<0.05?"*":"";
+    var pStr=v.pvalue<0.001?"<0.001":v.pvalue.toFixed(4);
+    var col=v.irr>1?"var(--tier-red)":"var(--tier-green)";
+    return "<tr>"
+      +"<td>"+(LABELS[k]||k)+"</td>"
+      +"<td style='font-variant-numeric:tabular-nums;color:"+col+";font-weight:600'>"+v.irr.toFixed(3)+"</td>"
+      +"<td style='font-variant-numeric:tabular-nums;font-size:.74rem;color:var(--text-muted)'>("+v.lo95.toFixed(3)+", "+v.hi95.toFixed(3)+")</td>"
+      +"<td style='font-variant-numeric:tabular-nums;color:var(--text-muted)'>"+pStr+"</td>"
+      +"<td><span class='sig-star'>"+sig+"</span></td></tr>";
+  }).join("");
+}
+
+// ── Epi: DQ Table ─────────────────────────────────────────────────
+function renderDQ() {
+  var dq=DATA.dq_scores||[];
+  document.getElementById("dq-tbody").innerHTML=dq.map(function(r){
+    function bar(v){
+      if (v===null||v===undefined) return '<span style="color:var(--text-sub)">—</span>';
+      var col=v>=80?"var(--tier-green)":v>=50?"var(--tier-amber)":"var(--tier-red)";
+      return '<div style="display:flex;align-items:center;gap:8px"><div class="dq-bar-wrap"><div class="dq-bar" style="width:'+Math.min(v,100)+'%;background:'+col+'"></div></div><span style="font-variant-numeric:tabular-nums;font-size:.78rem">'+v.toFixed(1)+'%</span></div>';
+    }
+    return "<tr><td><strong>"+r.source+"</strong></td><td>"+bar(r.completeness)+"</td><td>"+bar(r.coverage)+"</td><td>"+bar(r.consistency)+"</td></tr>";
+  }).join("");
+}
+
+function renderEpiView() {
+  renderMetrics();
+  renderFolds();
+  renderCasesChart();
+  renderTierChart();
+  renderIRR();
+  renderDQ();
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+function init() {
+  loadLiveData().then(function(live){
+    DATA = live ? Object.assign({}, STATIC, live) : STATIC;
+    document.getElementById("last-updated").textContent = "Updated: "+(DATA.generated_at||"2026-08-08");
+    renderKPI();
+    renderAlertTable();
+    renderMap();
+  });
+}
+
+init();
+</script>
+</body>
+</html>

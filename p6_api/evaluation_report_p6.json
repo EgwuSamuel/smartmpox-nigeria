@@ -1,0 +1,49 @@
+{
+  "phase": "P6",
+  "evaluated_at": "2026-08-09T04:53:57.089643+00:00",
+  "kpi4": {
+    "countries_alerted": {
+      "target": ">=3",
+      "result": 4,
+      "pass": true
+    },
+    "api_consumers": {
+      "target": ">=2",
+      "result": 3,
+      "pass": true
+    },
+    "delivery_hours_max": {
+      "target": "<=48",
+      "result": 0.036262086944444445,
+      "pass": true
+    }
+  },
+  "api_endpoints": {
+    "api_latest_risk (all states)": "PASS",
+    "api_cross_border_current": "PASS",
+    "api_weekly_cases (2024)": "PASS",
+    "cross_border_alerts (CMR)": "PASS",
+    "cross_border_alerts (BEN)": "PASS",
+    "cross_border_alerts (NER)": "PASS",
+    "cross_border_alerts (TCD)": "PASS"
+  },
+  "countries": [
+    {
+      "code": "BEN",
+      "name": "Benin Republic"
+    },
+    {
+      "code": "CMR",
+      "name": "Cameroon"
+    },
+    {
+      "code": "NER",
+      "name": "Niger Republic"
+    },
+    {
+      "code": "TCD",
+      "name": "Chad"
+    }
+  ],
+  "total_alerts": 8
+}
