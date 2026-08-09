@@ -434,7 +434,7 @@ function _getTierColor(tier) {
 
 function renderMap() {
   if (!DATA) return;
-  var NAME_NORM = { 'Federal Capital Territory': 'FCT Abuja' };
+  var NAME_NORM = { 'FederalCapitalTerritory':'FCT Abuja', 'Federal Capital Territory':'FCT Abuja', 'AkwaIbom':'Akwa Ibom', 'Akwa Ibom':'Akwa Ibom', 'CrossRiver':'Cross River', 'Cross River':'Cross River' };
   var scoreByName = {};
   (DATA.latest_scores||[]).forEach(function(s){ scoreByName[s.state_name] = s; });
   function getScore(n) { return scoreByName[NAME_NORM[n] || n] || null; }
@@ -841,7 +841,7 @@ function _getTierColor(tier) {
 
 function renderMap() {
   if (!DATA) return;
-  var NAME_NORM = { 'Federal Capital Territory': 'FCT Abuja' };
+  var NAME_NORM = { 'FederalCapitalTerritory':'FCT Abuja', 'Federal Capital Territory':'FCT Abuja', 'AkwaIbom':'Akwa Ibom', 'Akwa Ibom':'Akwa Ibom', 'CrossRiver':'Cross River', 'Cross River':'Cross River' };
   var scoreByName = {};
   (DATA.latest_scores||[]).forEach(function(s){ scoreByName[s.state_name] = s; });
   function getScore(n) { return scoreByName[NAME_NORM[n] || n] || null; }
