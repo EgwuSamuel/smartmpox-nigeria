@@ -1,0 +1,24 @@
+{
+  "model": "castorini/afriberta_large",
+  "test_size": 40,
+  "afriberta": {
+    "precision": 1.0,
+    "recall": 0.8235,
+    "f1": 0.9032,
+    "confusion_matrix": [
+      [
+        23,
+        0
+      ],
+      [
+        3,
+        14
+      ]
+    ]
+  },
+  "keyword_filter": {
+    "precision": 0.85,
+    "recall": 1.0,
+    "f1": 0.9189
+  }
+}
