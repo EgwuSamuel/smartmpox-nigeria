@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartMpox — Admin Portal</title>
+<style>
+:root {
+  --accent:      #0FA37F;
+  --accent-d:    #0C8568;
+  --accent-bg:   #E8F7F3;
+  --danger:      #EF4444;
+  --danger-bg:   #FEF2F2;
+  --warn:        #F59E0B;
+  --warn-bg:     #FFFBEB;
+  --blue:        #3B82F6;
+  --blue-bg:     #EFF6FF;
+  --bg:          #F1F5F9;
+  --surface:     #FFFFFF;
+  --surface2:    #F8FAFC;
+  --border:      #E2E8F0;
+  --text:        #0F172A;
+  --text2:       #475569;
+  --text3:       #94A3B8;
+  --radius:      8px;
+  --shadow:      0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  font-family: system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+[data-theme="dark"] {
+  --bg:#0F172A; --surface:#1E293B; --surface2:#1E293B;
+  --border:#334155; --text:#F1F5F9; --text2:#CBD5E1; --text3:#64748B;
+  --accent-bg:#064E3B; --danger-bg:#450A0A; --warn-bg:#451A03; --blue-bg:#1E3A5F;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── LOGIN ── */
+#login-screen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg, #0C8568 0%, #0F172A 100%);
+}
+.login-card {
+  background:var(--surface); border-radius:12px; padding:2.5rem 2rem;
+  width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.login-logo { display:flex; flex-direction:column; align-items:center; gap:.75rem; margin-bottom:1.75rem; }
+.login-logo img { width:80px; height:80px; object-fit:contain; }
+.login-logo h1 { font-size:1.15rem; font-weight:700; color:var(--text); text-align:center; }
+.login-logo p  { font-size:.78rem; color:var(--text3); text-align:center; }
+.form-group { margin-bottom:1rem; }
+.form-group label { display:block; font-size:.78rem; font-weight:600; color:var(--text2); margin-bottom:.35rem; letter-spacing:.03em; }
+.form-group input {
+  width:100%; padding:.6rem .8rem; border:1px solid var(--border);
+  border-radius:var(--radius); background:var(--surface2); color:var(--text);
+  font-size:.9rem; outline:none; transition:border-color .15s;
+}
+.form-group input:focus { border-color:var(--accent); }
+.btn-login {
+  width:100%; padding:.7rem; background:var(--accent); color:#fff;
+  border:none; border-radius:var(--radius); font-size:.95rem; font-weight:600;
+  cursor:pointer; margin-top:.5rem; transition:background .15s;
+}
+.btn-login:hover { background:var(--accent-d); }
+.login-error { color:var(--danger); font-size:.8rem; margin-top:.5rem; text-align:center; min-height:1.2em; }
+
+/* ── APP SHELL ── */
+#app { display:none; height:100vh; flex-direction:column; }
+.topbar {
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:.6rem 1.25rem; display:flex; align-items:center; gap:1rem;
+  position:sticky; top:0; z-index:100; box-shadow:var(--shadow);
+}
+.topbar-logo { display:flex; align-items:center; gap:.6rem; }
+.topbar-logo img { width:40px; height:40px; object-fit:contain; }
+.topbar-logo span { font-weight:700; font-size:1rem; }
+.topbar-logo small { font-size:.7rem; color:var(--text3); display:block; }
+.topbar-spacer { flex:1; }
+.admin-pill {
+  background:var(--accent-bg); color:var(--accent); font-size:.72rem;
+  font-weight:600; padding:.25rem .65rem; border-radius:999px; letter-spacing:.04em;
+}
+#admin-email { font-size:.8rem; color:var(--text2); }
+.btn-logout {
+  padding:.35rem .8rem; border:1px solid var(--border); border-radius:var(--radius);
+  background:none; color:var(--text2); font-size:.78rem; cursor:pointer;
+}
+.btn-logout:hover { border-color:var(--danger); color:var(--danger); }
+.theme-btn { background:none; border:1px solid var(--border); border-radius:var(--radius); padding:.3rem .6rem; cursor:pointer; font-size:.85rem; color:var(--text2); }
+
+/* ── MAIN CONTENT ── */
+.main { display:flex; flex:1; overflow:hidden; }
+
+/* ── STATS ROW ── */
+.content-area { flex:1; overflow-y:auto; padding:1.25rem; display:flex; flex-direction:column; gap:1rem; }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; }
+.stat-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:1rem 1.1rem; display:flex; flex-direction:column; gap:.3rem;
+}
+.stat-card .s-label { font-size:.7rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--text3); }
+.stat-card .s-value { font-size:1.9rem; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; }
+.stat-card .s-sub   { font-size:.75rem; color:var(--text3); }
+.s-total   { color:var(--text); }
+.s-pending { color:var(--warn); }
+.s-reviewed{ color:var(--accent); }
+.s-flagged { color:var(--danger); }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:.75rem 1rem; display:flex; gap:.6rem; align-items:center; flex-wrap:wrap;
+}
+.filter-bar input, .filter-bar select {
+  padding:.4rem .7rem; border:1px solid var(--border); border-radius:6px;
+  background:var(--surface2); color:var(--text); font-size:.82rem; outline:none;
+}
+.filter-bar input { flex:1; min-width:180px; }
+.filter-bar input:focus, .filter-bar select:focus { border-color:var(--accent); }
+.btn-export {
+  padding:.4rem .9rem; background:var(--accent); color:#fff; border:none;
+  border-radius:6px; font-size:.82rem; font-weight:600; cursor:pointer; margin-left:auto;
+}
+.btn-export:hover { background:var(--accent-d); }
+.count-badge { font-size:.78rem; color:var(--text3); white-space:nowrap; }
+
+/* ── TABLE ── */
+.table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; flex:1; display:flex; flex-direction:column; }
+.table-scroll { overflow:auto; flex:1; }
+table { width:100%; border-collapse:collapse; font-size:.82rem; }
+thead { position:sticky; top:0; z-index:10; }
+th {
+  background:var(--surface2); padding:.6rem 1rem; text-align:left;
+  font-size:.68rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--text3); border-bottom:1px solid var(--border); white-space:nowrap;
+  cursor:pointer; user-select:none;
+}
+th:hover { color:var(--text2); }
+td { padding:.65rem 1rem; border-bottom:1px solid var(--border); color:var(--text2); vertical-align:middle; }
+tr:last-child td { border-bottom:none; }
+tr.case-row { cursor:pointer; transition:background .1s; }
+tr.case-row:hover { background:var(--surface2); }
+tr.case-row.selected { background:var(--accent-bg); }
+td.case-id { font-family:monospace; font-size:.75rem; color:var(--text3); max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+td.case-name { font-weight:600; color:var(--text); }
+.empty-row td { text-align:center; padding:2.5rem; color:var(--text3); }
+
+/* ── STATUS PILLS ── */
+.pill {
+  display:inline-flex; align-items:center; gap:.3rem;
+  font-size:.7rem; font-weight:700; padding:.2rem .55rem;
+  border-radius:999px; letter-spacing:.04em; text-transform:uppercase; white-space:nowrap;
+}
+.pill-confirmed  { background:#DCFCE7; color:#166534; }
+.pill-suspected  { background:var(--warn-bg); color:#92400E; }
+.pill-probable   { background:var(--blue-bg); color:#1E40AF; }
+.pill-discarded  { background:var(--border); color:var(--text3); }
+.pill-pending    { background:var(--warn-bg); color:#92400E; }
+.pill-reviewed   { background:var(--accent-bg); color:var(--accent-d); }
+.pill-flagged    { background:var(--danger-bg); color:var(--danger); }
+[data-theme="dark"] .pill-confirmed { background:#14532D; color:#4ADE80; }
+[data-theme="dark"] .pill-suspected { background:#451A03; color:#FCD34D; }
+[data-theme="dark"] .pill-probable  { background:#1E3A5F; color:#93C5FD; }
+
+/* ── DETAIL PANEL ── */
+.detail-panel {
+  width:440px; min-width:440px; background:var(--surface); border-left:1px solid var(--border);
+  display:none; flex-direction:column; overflow:hidden;
+}
+.detail-panel.open { display:flex; }
+.detail-header {
+  padding:1rem 1.25rem; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:.75rem; flex-shrink:0;
+}
+.detail-header h3 { font-size:.95rem; font-weight:700; flex:1; }
+.btn-close { background:none; border:none; font-size:1.1rem; cursor:pointer; color:var(--text3); padding:.2rem; }
+.btn-close:hover { color:var(--text); }
+.detail-body { overflow-y:auto; flex:1; padding:0 1.25rem 1.25rem; }
+.detail-section { margin-top:1.1rem; }
+.detail-section h4 {
+  font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--text3); padding-bottom:.5rem; border-bottom:1px solid var(--border); margin-bottom:.6rem;
+}
+.detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:.4rem .75rem; }
+.detail-field label { font-size:.7rem; color:var(--text3); display:block; margin-bottom:.15rem; }
+.detail-field span  { font-size:.83rem; color:var(--text); font-weight:500; }
+.detail-field.wide  { grid-column:1/-1; }
+.review-box { margin-top:1.1rem; padding:1rem; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius); }
+.review-box h4 { font-size:.68rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text3); margin-bottom:.75rem; }
+.review-box select, .review-box textarea {
+  width:100%; padding:.5rem .7rem; border:1px solid var(--border); border-radius:6px;
+  background:var(--surface); color:var(--text); font-size:.83rem; outline:none;
+  font-family:inherit;
+}
+.review-box select:focus, .review-box textarea:focus { border-color:var(--accent); }
+.review-box textarea { resize:vertical; min-height:80px; margin-top:.6rem; }
+.btn-save {
+  margin-top:.75rem; width:100%; padding:.55rem; background:var(--accent); color:#fff;
+  border:none; border-radius:var(--radius); font-size:.85rem; font-weight:600; cursor:pointer;
+}
+.btn-save:hover { background:var(--accent-d); }
+.save-msg { font-size:.75rem; text-align:center; margin-top:.4rem; min-height:1em; color:var(--accent); }
+
+/* ── LOADING ── */
+.loading { text-align:center; padding:2rem; color:var(--text3); font-size:.85rem; }
+@media (max-width:900px) {
+  .stats-row { grid-template-columns:repeat(2,1fr); }
+  .detail-panel { width:100%; min-width:unset; border-left:none; border-top:1px solid var(--border); }
+  .main { flex-direction:column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="/smartmpox-nigeria/shared/logo.png" alt="AIA4OneHealth" onerror="this.style.display='none'">
+      <h1>SmartMpox Admin Portal</h1>
+      <p>AIA4OneHealth · Nigeria Surveillance System</p>
+    </div>
+    <div class="form-group">
+      <label>Admin Email</label>
+      <input type="email" id="login-email" placeholder="admin@aia4onehealth.org" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-login" onclick="login()">Sign In</button>
+    <p class="login-error" id="login-error"></p>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════════════ -->
+<div id="app">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <img src="/smartmpox-nigeria/shared/logo.png" alt="AIA4OneHealth" onerror="this.style.display='none'">
+      <div>
+        <span>SmartMpox Admin</span>
+        <small>Nigeria Mpox Surveillance</small>
+      </div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <span class="admin-pill">ADMIN</span>
+    <span id="admin-email"></span>
+    <button class="theme-btn" onclick="toggleTheme()">☀ / ☾</button>
+    <button class="btn-logout" onclick="logout()">Sign out</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Content area -->
+    <div class="content-area">
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="s-label">Total Cases</span>
+          <span class="s-value s-total" id="s-total">—</span>
+          <span class="s-sub">all time</span>
+        </div>
+        <div class="stat-card">
+          <span class="s-label">Pending Review</span>
+          <span class="s-value s-pending" id="s-pending">—</span>
+          <span class="s-sub">awaiting admin</span>
+        </div>
+        <div class="stat-card">
+          <span class="s-label">Reviewed</span>
+          <span class="s-value s-reviewed" id="s-reviewed">—</span>
+          <span class="s-sub">completed</span>
+        </div>
+        <div class="stat-card">
+          <span class="s-label">Flagged</span>
+          <span class="s-value s-flagged" id="s-flagged">—</span>
+          <span class="s-sub">need attention</span>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <input type="text" id="search" placeholder="Search by state, classification, outcome…" oninput="applyFilters()">
+        <select id="f-classification" onchange="applyFilters()">
+          <option value="">All Classifications</option>
+          <option>confirmed</option>
+          <option>suspected</option>
+          <option>probable</option>
+          <option>discarded</option>
+        </select>
+        <select id="f-review" onchange="applyFilters()">
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="reviewed">Reviewed</option>
+          <option value="flagged">Flagged</option>
+        </select>
+        <select id="f-year" onchange="applyFilters()">
+          <option value="">All Years</option>
+          <option>2026</option><option>2025</option><option>2024</option>
+          <option>2023</option><option>2022</option>
+        </select>
+        <span class="count-badge" id="count-badge"></span>
+        <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table id="cases-table">
+            <thead>
+              <tr>
+                <th onclick="sortBy('case_id')">Case ID</th>
+                <th onclick="sortBy('date_reported')">Date Reported</th>
+                <th onclick="sortBy('state_id')">State</th>
+                <th onclick="sortBy('case_classification')">Classification</th>
+                <th onclick="sortBy('sex')">Sex</th>
+                <th onclick="sortBy('age_years')">Age</th>
+                <th onclick="sortBy('outcome')">Outcome</th>
+                <th onclick="sortBy('review_status')">Review</th>
+              </tr>
+            </thead>
+            <tbody id="cases-body">
+              <tr><td colspan="8" class="loading">Loading cases…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+
+    <!-- Detail panel -->
+    <div class="detail-panel" id="detail-panel">
+      <div class="detail-header">
+        <h3 id="d-title">Case Detail</h3>
+        <button class="btn-close" onclick="closeDetail()">✕</button>
+      </div>
+      <div class="detail-body">
+
+        <div class="detail-section">
+          <h4>Case Identification</h4>
+          <div class="detail-grid">
+            <div class="detail-field wide"><label>Case ID</label><span id="d-case_id"></span></div>
+            <div class="detail-field"><label>Classification</label><span id="d-classification"></span></div>
+            <div class="detail-field"><label>Clade</label><span id="d-clade"></span></div>
+            <div class="detail-field"><label>Date Reported</label><span id="d-date_reported"></span></div>
+            <div class="detail-field"><label>Epi Week</label><span id="d-epiweek"></span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Location</h4>
+          <div class="detail-grid">
+            <div class="detail-field"><label>State</label><span id="d-state"></span></div>
+            <div class="detail-field"><label>Precision</label><span id="d-precision"></span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Patient</h4>
+          <div class="detail-grid">
+            <div class="detail-field"><label>Age</label><span id="d-age"></span></div>
+            <div class="detail-field"><label>Sex</label><span id="d-sex"></span></div>
+            <div class="detail-field"><label>Age Group</label><span id="d-age_group"></span></div>
+            <div class="detail-field"><label>Occupation</label><span id="d-occupation"></span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Clinical</h4>
+          <div class="detail-grid">
+            <div class="detail-field"><label>Date Onset</label><span id="d-date_onset"></span></div>
+            <div class="detail-field"><label>Days to Report</label><span id="d-days_onset"></span></div>
+            <div class="detail-field"><label>Fever</label><span id="d-fever"></span></div>
+            <div class="detail-field"><label>Rash</label><span id="d-rash"></span></div>
+            <div class="detail-field"><label>Lymphadenopathy</label><span id="d-lymph"></span></div>
+            <div class="detail-field"><label>Hospitalised</label><span id="d-hosp"></span></div>
+            <div class="detail-field"><label>Outcome</label><span id="d-outcome"></span></div>
+            <div class="detail-field wide"><label>Other Symptoms</label><span id="d-symptom_other"></span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Exposure & Lab</h4>
+          <div class="detail-grid">
+            <div class="detail-field"><label>Contact Type</label><span id="d-contact"></span></div>
+            <div class="detail-field"><label>Travel History</label><span id="d-travel"></span></div>
+            <div class="detail-field"><label>Lab Tested</label><span id="d-lab_tested"></span></div>
+            <div class="detail-field"><label>Lab Result</label><span id="d-lab_result"></span></div>
+            <div class="detail-field"><label>Lab Method</label><span id="d-lab_method"></span></div>
+            <div class="detail-field"><label>Vaccinated (Smallpox)</label><span id="d-vacc"></span></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Notes</h4>
+          <div class="detail-grid">
+            <div class="detail-field wide"><label>Case Notes</label><span id="d-notes"></span></div>
+            <div class="detail-field"><label>Ingested At</label><span id="d-ingested"></span></div>
+          </div>
+        </div>
+
+        <!-- Admin review box -->
+        <div class="review-box">
+          <h4>Admin Review</h4>
+          <select id="r-status">
+            <option value="pending">Pending</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="flagged">Flagged</option>
+          </select>
+          <textarea id="r-notes" placeholder="Add review notes…"></textarea>
+          <button class="btn-save" onclick="saveReview()">Save Review</button>
+          <p class="save-msg" id="save-msg"></p>
+        </div>
+
+      </div><!-- /detail-body -->
+    </div><!-- /detail-panel -->
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+const SUPABASE_URL  = "https://tspwkxyiralnukmefagl.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcHdreHlpcmFsbnVrbWVmYWdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyMDMwNTYsImV4cCI6MjEwMTc3OTA1Nn0.Jcmy5vwAjybjv5rkWX6r5LHC0-9ulQtVuUX1bWiH70s";
+
+const STATE_NAMES = {
+  1:"Abia",2:"Adamawa",3:"Akwa Ibom",4:"Anambra",5:"Bauchi",6:"Bayelsa",
+  7:"Benue",8:"Borno",9:"Cross River",10:"Delta",11:"Ebonyi",12:"Edo",
+  13:"Ekiti",14:"Enugu",15:"Gombe",16:"Imo",17:"Jigawa",18:"Kaduna",
+  19:"Kano",20:"Katsina",21:"Kebbi",22:"Kogi",23:"Kwara",24:"Lagos",
+  25:"Nasarawa",26:"Niger",27:"Ogun",28:"Ondo",29:"Osun",30:"Oyo",
+  31:"Plateau",32:"Rivers",33:"Sokoto",34:"Taraba",35:"Yobe",36:"Zamfara",37:"FCT Abuja"
+};
+
+let authToken = sessionStorage.getItem("admin_token");
+let adminEmail = sessionStorage.getItem("admin_email") || "";
+let allCases = [], filtered = [], selectedId = null, sortCol = "date_reported", sortAsc = false;
+
+// ── AUTH ────────────────────────────────────────────────────────
+async function login() {
+  const email = document.getElementById("login-email").value.trim();
+  const pass  = document.getElementById("login-password").value;
+  const errEl = document.getElementById("login-error");
+  errEl.textContent = "";
+  if (!email || !pass) { errEl.textContent = "Enter email and password."; return; }
+  const btn = document.querySelector(".btn-login");
+  btn.textContent = "Signing in…"; btn.disabled = true;
+  try {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": SUPABASE_ANON },
+      body: JSON.stringify({ email, password: pass }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error_description || data.msg || "Login failed");
+    authToken = data.access_token;
+    adminEmail = email;
+    sessionStorage.setItem("admin_token", authToken);
+    sessionStorage.setItem("admin_email", adminEmail);
+    showApp();
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.textContent = "Sign In"; btn.disabled = false;
+  }
+}
+
+function logout() {
+  sessionStorage.clear(); authToken = null;
+  document.getElementById("app").style.display = "none";
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("login-password").value = "";
+}
+
+function showApp() {
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app").style.display = "flex";
+  document.getElementById("admin-email").textContent = adminEmail;
+  loadCases();
+}
+
+// ── DATA ────────────────────────────────────────────────────────
+function authHeaders() {
+  return { "apikey": SUPABASE_ANON, "Authorization": `Bearer ${authToken}` };
+}
+
+async function loadCases() {
+  document.getElementById("cases-body").innerHTML = '<tr><td colspan="8" class="loading">Loading…</td></tr>';
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/cases_individual?select=case_id,source_id,case_classification,clade,date_onset,date_reported,date_hospitalised,date_outcome,report_year,report_epiweek,state_id,lga_id,location_precision,age_years,age_group,sex,occupation,symptom_fever,symptom_rash,symptom_lymphadenopathy,symptom_other,contact_type,travel_history,travel_country,lab_tested,lab_method,lab_result,outcome,vaccinated_smallpox,notes,review_status,review_notes,reviewed_by,reviewed_at,ingested_at&order=date_reported.desc.nullslast`,
+      { headers: authHeaders() }
+    );
+    if (!r.ok) throw new Error("Fetch failed — check auth token");
+    allCases = await r.json();
+    updateStats();
+    applyFilters();
+  } catch(e) {
+    document.getElementById("cases-body").innerHTML = `<tr><td colspan="8" class="empty-row">${e.message}</td></tr>`;
+  }
+}
+
+async function saveReview() {
+  if (!selectedId) return;
+  const status = document.getElementById("r-status").value;
+  const notes  = document.getElementById("r-notes").value;
+  const msg    = document.getElementById("save-msg");
+  msg.textContent = "Saving…"; msg.style.color = "var(--text3)";
+  try {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/cases_individual?case_id=eq.${selectedId}`,
+      {
+        method: "PATCH",
+        headers: { ...authHeaders(), "Content-Type": "application/json", "Prefer": "return=minimal" },
+        body: JSON.stringify({ review_status: status, review_notes: notes, reviewed_by: adminEmail, reviewed_at: new Date().toISOString() }),
+      }
+    );
+    if (!r.ok) throw new Error("Update failed");
+    const idx = allCases.findIndex(c => c.case_id === selectedId);
+    if (idx > -1) { allCases[idx].review_status = status; allCases[idx].review_notes = notes; allCases[idx].reviewed_by = adminEmail; }
+    updateStats(); applyFilters();
+    msg.textContent = "Saved ✓"; msg.style.color = "var(--accent)";
+    setTimeout(() => msg.textContent = "", 2500);
+  } catch(e) { msg.textContent = e.message; msg.style.color = "var(--danger)"; }
+}
+
+// ── STATS ───────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById("s-total").textContent    = allCases.length;
+  document.getElementById("s-pending").textContent  = allCases.filter(c=>c.review_status==="pending"||!c.review_status).length;
+  document.getElementById("s-reviewed").textContent = allCases.filter(c=>c.review_status==="reviewed").length;
+  document.getElementById("s-flagged").textContent  = allCases.filter(c=>c.review_status==="flagged").length;
+}
+
+// ── FILTERS & SORT ──────────────────────────────────────────────
+function applyFilters() {
+  const q    = document.getElementById("search").value.toLowerCase();
+  const cls  = document.getElementById("f-classification").value;
+  const rev  = document.getElementById("f-review").value;
+  const yr   = document.getElementById("f-year").value;
+  filtered = allCases.filter(c => {
+    const stateName = (STATE_NAMES[c.state_id]||"").toLowerCase();
+    const matchQ = !q || stateName.includes(q) || (c.case_classification||"").includes(q) || (c.outcome||"").includes(q) || (c.case_id||"").includes(q);
+    const matchC = !cls || c.case_classification === cls;
+    const matchR = !rev || (c.review_status||"pending") === rev;
+    const matchY = !yr  || String(c.report_year) === yr;
+    return matchQ && matchC && matchR && matchY;
+  });
+  sortCases();
+  renderTable();
+  document.getElementById("count-badge").textContent = `${filtered.length} case${filtered.length!==1?"s":""}`;
+}
+
+function sortBy(col) {
+  if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
+  sortCases(); renderTable();
+}
+function sortCases() {
+  filtered.sort((a,b) => {
+    let av = a[sortCol]??'', bv = b[sortCol]??'';
+    if (av < bv) return sortAsc ? -1 : 1;
+    if (av > bv) return sortAsc ?  1 : -1;
+    return 0;
+  });
+}
+
+// ── TABLE RENDER ────────────────────────────────────────────────
+function renderTable() {
+  const tbody = document.getElementById("cases-body");
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-row">No cases match the current filters.</td></tr>'; return; }
+  tbody.innerHTML = filtered.map(c => {
+    const cls = c.case_classification || "—";
+    const rev = c.review_status || "pending";
+    const sel = c.case_id === selectedId ? " selected" : "";
+    return `<tr class="case-row${sel}" onclick="openDetail('${c.case_id}')">
+      <td class="case-id">${c.case_id?.slice(0,8)}…</td>
+      <td>${c.date_reported || "—"}</td>
+      <td>${STATE_NAMES[c.state_id] || c.state_id || "—"}</td>
+      <td><span class="pill pill-${cls}">${cls}</span></td>
+      <td>${c.sex || "—"}</td>
+      <td>${c.age_years ?? "—"}</td>
+      <td>${c.outcome || "—"}</td>
+      <td><span class="pill pill-${rev}">${rev}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+// ── DETAIL PANEL ────────────────────────────────────────────────
+function openDetail(caseId) {
+  const c = allCases.find(x => x.case_id === caseId);
+  if (!c) return;
+  selectedId = caseId;
+  renderTable();
+  const v = (val) => val ?? "—";
+  const b = (val) => val === true ? "Yes" : val === false ? "No" : "—";
+  document.getElementById("d-title").textContent = `Case ${c.case_id?.slice(0,8)}…`;
+  document.getElementById("d-case_id").textContent         = c.case_id;
+  document.getElementById("d-classification").innerHTML    = `<span class="pill pill-${c.case_classification}">${v(c.case_classification)}</span>`;
+  document.getElementById("d-clade").textContent           = v(c.clade);
+  document.getElementById("d-date_reported").textContent   = v(c.date_reported);
+  document.getElementById("d-epiweek").textContent         = c.report_year && c.report_epiweek ? `${c.report_year} W${c.report_epiweek}` : "—";
+  document.getElementById("d-state").textContent           = STATE_NAMES[c.state_id] || v(c.state_id);
+  document.getElementById("d-precision").textContent       = v(c.location_precision);
+  document.getElementById("d-age").textContent             = v(c.age_years);
+  document.getElementById("d-sex").textContent             = v(c.sex);
+  document.getElementById("d-age_group").textContent       = v(c.age_group);
+  document.getElementById("d-occupation").textContent      = v(c.occupation);
+  document.getElementById("d-date_onset").textContent      = v(c.date_onset);
+  document.getElementById("d-days_onset").textContent      = v(c.days_onset_to_report);
+  document.getElementById("d-fever").textContent           = b(c.symptom_fever);
+  document.getElementById("d-rash").textContent            = b(c.symptom_rash);
+  document.getElementById("d-lymph").textContent           = b(c.symptom_lymphadenopathy);
+  document.getElementById("d-hosp").textContent            = c.date_hospitalised ? "Yes" : "No";
+  document.getElementById("d-outcome").textContent         = v(c.outcome);
+  document.getElementById("d-symptom_other").textContent   = v(c.symptom_other);
+  document.getElementById("d-contact").textContent         = v(c.contact_type);
+  document.getElementById("d-travel").textContent          = b(c.travel_history);
+  document.getElementById("d-lab_tested").textContent      = b(c.lab_tested);
+  document.getElementById("d-lab_result").textContent      = v(c.lab_result);
+  document.getElementById("d-lab_method").textContent      = v(c.lab_method);
+  document.getElementById("d-vacc").textContent            = b(c.vaccinated_smallpox);
+  document.getElementById("d-notes").textContent           = v(c.notes);
+  document.getElementById("d-ingested").textContent        = c.ingested_at ? new Date(c.ingested_at).toLocaleString() : "—";
+  document.getElementById("r-status").value                = c.review_status || "pending";
+  document.getElementById("r-notes").value                 = c.review_notes || "";
+  document.getElementById("save-msg").textContent          = c.reviewed_by ? `Last reviewed by ${c.reviewed_by}` : "";
+  document.getElementById("save-msg").style.color          = "var(--text3)";
+  document.getElementById("detail-panel").classList.add("open");
+}
+
+function closeDetail() {
+  selectedId = null;
+  document.getElementById("detail-panel").classList.remove("open");
+  renderTable();
+}
+
+// ── EXPORT CSV ──────────────────────────────────────────────────
+function exportCSV() {
+  if (!filtered.length) return;
+  const cols = ["case_id","date_reported","report_year","report_epiweek","state","case_classification","clade","sex","age_years","age_group","outcome","lab_result","review_status","reviewed_by","reviewed_at"];
+  const rows = [cols.join(",")];
+  filtered.forEach(c => {
+    rows.push([
+      c.case_id, c.date_reported, c.report_year, c.report_epiweek,
+      STATE_NAMES[c.state_id]||c.state_id||"",
+      c.case_classification, c.clade||"", c.sex||"", c.age_years||"", c.age_group||"",
+      c.outcome||"", c.lab_result||"",
+      c.review_status||"pending", c.reviewed_by||"", c.reviewed_at||""
+    ].map(v => `"${String(v??'').replace(/"/g,'""')}"`).join(","));
+  });
+  const blob = new Blob([rows.join("\n")], { type:"text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `smartmpox_cases_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ── THEME ───────────────────────────────────────────────────────
+function toggleTheme() {
+  const t = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", t);
+  localStorage.setItem("theme", t);
+}
+
+// ── INIT ────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  const t = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", t);
+  document.getElementById("login-password").addEventListener("keydown", e => { if(e.key==="Enter") login(); });
+  if (authToken) showApp(); // auto-login if session exists
+});
+</script>
+</body>
+</html>
