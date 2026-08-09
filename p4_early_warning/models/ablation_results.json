@@ -1,0 +1,83 @@
+{
+  "computed_at": "2026-08-09T13:14:59.618167+00:00",
+  "full_model_auc": 0.7035,
+  "folds": [
+    "2019\u21922020",
+    "2020\u21922021",
+    "2021\u21922022",
+    "2022\u21922023"
+  ],
+  "results": {
+    "Full model (all streams)": {
+      "features_used": 16,
+      "features_removed": [],
+      "fold_aucs": [
+        0.6885,
+        0.6864,
+        0.7355
+      ],
+      "mean_auc": 0.7035,
+      "delta_vs_full": 0.0
+    },
+    "No climate": {
+      "features_used": 13,
+      "features_removed": [
+        "rainfall_t2_mm",
+        "rainfall_t4_mm",
+        "temp_mean_t1_c"
+      ],
+      "fold_aucs": [
+        0.7482,
+        0.7148,
+        0.7249
+      ],
+      "mean_auc": 0.7293,
+      "delta_vs_full": 0.0258
+    },
+    "No reservoir/ecology": {
+      "features_used": 15,
+      "features_removed": [
+        "reservoir_risk_index"
+      ],
+      "fold_aucs": [
+        0.6408,
+        0.6989,
+        0.7276
+      ],
+      "mean_auc": 0.6891,
+      "delta_vs_full": -0.0144
+    },
+    "No spatial": {
+      "features_used": 14,
+      "features_removed": [
+        "is_border_state",
+        "neighbour_cases_t1"
+      ],
+      "fold_aucs": [
+        0.6989,
+        0.6922,
+        0.7192
+      ],
+      "mean_auc": 0.7034,
+      "delta_vs_full": -0.0001
+    },
+    "Cases only (baseline)": {
+      "features_used": 10,
+      "features_removed": [
+        "rainfall_t2_mm",
+        "rainfall_t4_mm",
+        "temp_mean_t1_c",
+        "reservoir_risk_index",
+        "is_border_state",
+        "neighbour_cases_t1"
+      ],
+      "fold_aucs": [
+        0.6676,
+        0.7183,
+        0.7077
+      ],
+      "mean_auc": 0.6979,
+      "delta_vs_full": -0.0056
+    }
+  }
+}

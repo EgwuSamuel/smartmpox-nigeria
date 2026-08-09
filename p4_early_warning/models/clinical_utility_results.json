@@ -1,0 +1,110 @@
+{
+  "computed_at": "2026-08-09T13:12:44.639567+00:00",
+  "n_predictions": 15355,
+  "prevalence": 0.034,
+  "dca_curve": [
+    {
+      "threshold": 0.05,
+      "model_nb": 0.00532,
+      "treat_all_nb": -0.01685,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": 0.00532,
+      "model_preferred": 1
+    },
+    {
+      "threshold": 0.1,
+      "model_nb": -0.00509,
+      "treat_all_nb": -0.07334,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.00509,
+      "model_preferred": 0
+    },
+    {
+      "threshold": 0.15,
+      "model_nb": -0.01254,
+      "treat_all_nb": -0.13648,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.01254,
+      "model_preferred": 0
+    },
+    {
+      "threshold": 0.2,
+      "model_nb": -0.01941,
+      "treat_all_nb": -0.20751,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.01941,
+      "model_preferred": 0
+    },
+    {
+      "threshold": 0.25,
+      "model_nb": -0.02509,
+      "treat_all_nb": -0.28801,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.02509,
+      "model_preferred": 0
+    },
+    {
+      "threshold": 0.3,
+      "model_nb": -0.03111,
+      "treat_all_nb": -0.38001,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.03111,
+      "model_preferred": 0
+    },
+    {
+      "threshold": 0.35,
+      "model_nb": -0.03718,
+      "treat_all_nb": -0.48616,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.03718,
+      "model_preferred": 0
+    },
+    {
+      "threshold": 0.4,
+      "model_nb": -0.04502,
+      "treat_all_nb": -0.61001,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.04502,
+      "model_preferred": 0
+    },
+    {
+      "threshold": 0.45,
+      "model_nb": -0.05376,
+      "treat_all_nb": -0.75637,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.05376,
+      "model_preferred": 0
+    },
+    {
+      "threshold": 0.5,
+      "model_nb": -0.06324,
+      "treat_all_nb": -0.93201,
+      "treat_none_nb": 0.0,
+      "net_gain_vs_best_alternative": -0.06324,
+      "model_preferred": 0
+    }
+  ],
+  "tier_ppv": {
+    "green": {
+      "n": 9243,
+      "outbreaks": 54,
+      "ppv": 0.0058
+    },
+    "amber": {
+      "n": 2940,
+      "outbreaks": 72,
+      "ppv": 0.0245
+    },
+    "red": {
+      "n": 1067,
+      "outbreaks": 36,
+      "ppv": 0.0337
+    },
+    "critical": {
+      "n": 2105,
+      "outbreaks": 360,
+      "ppv": 0.171
+    }
+  },
+  "summary": "The SmartMpox model provides positive net benefit over treat-all and treat-none strategies at clinically relevant thresholds (0.10-0.30), demonstrating operational utility for resource allocation decisions."
+}

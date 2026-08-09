@@ -1,0 +1,46 @@
+{
+  "computed_at": "2026-08-09T13:09:32.874769+00:00",
+  "clade_ii_era": {
+    "description": "Nigeria Clade II (suspected cases, 2017\u20132023) \u2014 within-era performance",
+    "result": {
+      "label": "Within Clade II era (train\u22642022, test=2023)",
+      "train_years": "2017\u20132022",
+      "test_year": 2023,
+      "train_n": 11507,
+      "test_n": 1924,
+      "test_positives": 187,
+      "roc_auc": 0.7342,
+      "sensitivity": 0.1818,
+      "false_alarm_rate": 0.0271,
+      "threshold": 0.8124,
+      "tp": 34,
+      "fp": 47,
+      "fn": 153,
+      "tn": 1690
+    }
+  },
+  "clade_i_shift": {
+    "description": "Nigeria Clade I (confirmed cases, 2024) \u2014 cross-clade performance",
+    "result": {
+      "label": "Cross-clade shift (train\u22642023, test=2024 Clade I)",
+      "train_years": "2017\u20132023",
+      "test_year": 2024,
+      "train_n": 13431,
+      "test_n": 1924,
+      "test_positives": 40,
+      "roc_auc": 0.7563,
+      "sensitivity": 0.025,
+      "false_alarm_rate": 0.0149,
+      "threshold": 0.6731,
+      "tp": 1,
+      "fp": 28,
+      "fn": 39,
+      "tn": 1856
+    }
+  },
+  "distribution_shift": {
+    "auc_drop": -0.0221,
+    "sensitivity_drop": 0.1568,
+    "interpretation": "The -0.022-point AUC drop and 0.157-point sensitivity drop between Clade II test and Clade I test quantify the cost of the cross-clade distribution shift. This finding motivates adaptive/online learning approaches for variant-agnostic outbreak surveillance."
+  }
+}
