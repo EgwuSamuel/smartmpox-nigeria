@@ -184,7 +184,7 @@ body{
 }
 
 /* ── Map ────────────────────────────────────────────────────── */
-#nigeria-map{width:100%;height:480px;position:relative}
+#nigeria-map{width:100%;height:480px;display:block}
 .map-legend{
   display:flex; gap:16px; flex-wrap:wrap;
   padding:12px 18px; border-top:1px solid var(--border);
@@ -293,7 +293,6 @@ svg.chart{overflow:visible}
   .kpi-row{grid-template-columns:1fr 1fr}
   .metric-row{flex-wrap:wrap}
 }
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"/>
 </style>
 </head>
 <body>
@@ -333,7 +332,7 @@ svg.chart{overflow:visible}
           <span class="card-title">Nigeria State Risk Map &mdash; 4-Week Outbreak Probability</span>
           <span class="card-meta" id="map-week-label"></span>
         </div>
-        <div id="nigeria-map"></div>
+        <svg id="nigeria-map" viewBox="0 0 520 440"></svg>
         <div class="map-legend">
           <div class="legend-item"><div class="legend-dot" style="background:var(--tier-critical)"></div>Critical (&ge;34.5%)</div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--tier-red)"></div>Red (20&ndash;34.5%)</div>
@@ -422,55 +421,6 @@ svg.chart{overflow:visible}
   &middot; XGBoost v1 &middot; 4-week horizon &middot; 37 states &middot; 2017&ndash;2024
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js">
-// ── Leaflet Choropleth Map ──────────────────────────────────────────────────
-var _leafletMap = null;
-var _geojsonLayer = null;
-
-function _getTierColor(tier) {
-  var isDark = document.documentElement.dataset.theme !== 'light';
-  return (isDark ? TIER_HEX_DARK : TIER_HEX_LIGHT)[tier] || (isDark ? '#475569' : '#CBD5E1');
-}
-
-function renderMap() {
-  if (!DATA) return;
-  var NAME_NORM = { 'FederalCapitalTerritory':'FCT Abuja', 'Federal Capital Territory':'FCT Abuja', 'AkwaIbom':'Akwa Ibom', 'Akwa Ibom':'Akwa Ibom', 'CrossRiver':'Cross River', 'Cross River':'Cross River' };
-  var scoreByName = {};
-  (DATA.latest_scores||[]).forEach(function(s){ scoreByName[s.state_name] = s; });
-  function getScore(n) { return scoreByName[NAME_NORM[n] || n] || null; }
-  function styleF(f) {
-    var s = getScore(f.properties.NAME_1 || '');
-    return { fillColor: s ? _getTierColor(s.risk_tier) : '#94a3b8', fillOpacity:0.82, color:'#fff', weight:1, opacity:0.9 };
-  }
-  if (_leafletMap && _geojsonLayer) { _geojsonLayer.setStyle(styleF); return; }
-  fetch('./nigeria_states.geojson')
-    .then(function(r){ if (!r.ok) throw new Error('no geojson'); return r.json(); })
-    .then(function(gj) {
-      var el = document.getElementById('nigeria-map');
-      el.style.height = '480px';
-      _leafletMap = L.map('nigeria-map', { center:[9.0,8.0], zoom:6, zoomControl:true, attributionControl:true, scrollWheelZoom:false });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
-        { subdomains:'abcd', maxZoom:12, attribution:'&copy; CARTO &copy; OSM contributors' }).addTo(_leafletMap);
-      _geojsonLayer = L.geoJSON(gj, {
-        style: styleF,
-        onEachFeature: function(f, layer) {
-          var s = getScore(f.properties.NAME_1 || '');
-          layer.on({
-            mouseover: function(e) {
-              layer.setStyle({ weight:2.5, fillOpacity:0.95 });
-              if (s) showTT({ clientX:e.originalEvent.clientX, clientY:e.originalEvent.clientY }, s.state_id);
-            },
-            mousemove: function(e) { positionTT(e.originalEvent); },
-            mouseout:  function() { _geojsonLayer.resetStyle(layer); hideTT(); }
-          });
-        }
-      }).addTo(_leafletMap);
-      var first = (DATA.latest_scores||[])[0];
-      if (first) document.getElementById('map-week-label').textContent = 'Epi Week '+first.epi_week+', '+first.epi_year;
-    })
-    .catch(function() { renderMapSVG(); });
-}
-</script>
 <script>
 // ── Config ──────────────────────────────────────────────────────
 var SUPABASE_URL = "https://tspwkxyiralnukmefagl.supabase.co";
@@ -590,7 +540,7 @@ function renderAlertTable() {
 }
 
 // ── Nigeria Map ─────────────────────────────────────────────────
-function renderMapSVG() {
+function renderMap() {
   if (!DATA) return;
   var svg = document.getElementById("nigeria-map");
   var VW = 520, VH = 440, PAD = 32;
@@ -829,54 +779,6 @@ function init() {
 }
 
 init();
-
-// ── Leaflet Choropleth Map ──────────────────────────────────────────────────
-var _leafletMap = null;
-var _geojsonLayer = null;
-
-function _getTierColor(tier) {
-  var isDark = document.documentElement.dataset.theme !== 'light';
-  return (isDark ? TIER_HEX_DARK : TIER_HEX_LIGHT)[tier] || (isDark ? '#475569' : '#CBD5E1');
-}
-
-function renderMap() {
-  if (!DATA) return;
-  var NAME_NORM = { 'FederalCapitalTerritory':'FCT Abuja', 'Federal Capital Territory':'FCT Abuja', 'AkwaIbom':'Akwa Ibom', 'Akwa Ibom':'Akwa Ibom', 'CrossRiver':'Cross River', 'Cross River':'Cross River' };
-  var scoreByName = {};
-  (DATA.latest_scores||[]).forEach(function(s){ scoreByName[s.state_name] = s; });
-  function getScore(n) { return scoreByName[NAME_NORM[n] || n] || null; }
-  function styleF(f) {
-    var s = getScore(f.properties.NAME_1 || '');
-    return { fillColor: s ? _getTierColor(s.risk_tier) : '#94a3b8', fillOpacity:0.82, color:'#fff', weight:1, opacity:0.9 };
-  }
-  if (_leafletMap && _geojsonLayer) { _geojsonLayer.setStyle(styleF); return; }
-  fetch('./nigeria_states.geojson')
-    .then(function(r){ if (!r.ok) throw new Error('no geojson'); return r.json(); })
-    .then(function(gj) {
-      var el = document.getElementById('nigeria-map');
-      el.style.height = '480px';
-      _leafletMap = L.map('nigeria-map', { center:[9.0,8.0], zoom:6, zoomControl:true, attributionControl:true, scrollWheelZoom:false });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',
-        { subdomains:'abcd', maxZoom:12, attribution:'&copy; CARTO &copy; OSM contributors' }).addTo(_leafletMap);
-      _geojsonLayer = L.geoJSON(gj, {
-        style: styleF,
-        onEachFeature: function(f, layer) {
-          var s = getScore(f.properties.NAME_1 || '');
-          layer.on({
-            mouseover: function(e) {
-              layer.setStyle({ weight:2.5, fillOpacity:0.95 });
-              if (s) showTT({ clientX:e.originalEvent.clientX, clientY:e.originalEvent.clientY }, s.state_id);
-            },
-            mousemove: function(e) { positionTT(e.originalEvent); },
-            mouseout:  function() { _geojsonLayer.resetStyle(layer); hideTT(); }
-          });
-        }
-      }).addTo(_leafletMap);
-      var first = (DATA.latest_scores||[])[0];
-      if (first) document.getElementById('map-week-label').textContent = 'Epi Week '+first.epi_week+', '+first.epi_year;
-    })
-    .catch(function() { renderMapSVG(); });
-}
 </script>
 </body>
 </html>
