@@ -1,0 +1,192 @@
+{
+  "computed_at": "2026-08-13T13:57:36.629475+00:00",
+  "description": "Knowledge-based expert inference layer fusing XGBoost evidence with codified epidemiological rules. Escalation-only (fail-safe); thresholds fitted on training folds (no leakage).",
+  "knowledge_base": [
+    {
+      "id": "R1",
+      "name": "reservoir_ecology",
+      "rationale": "NB-GLM reservoir_risk_index is the dominant predictor (IRR=4.49, p<0.001); high rodent-reservoir suitability is a structural One-Health risk the sparse case data under-weight."
+    },
+    {
+      "id": "R2",
+      "name": "border_paradox",
+      "rationale": "Border states with high reservoir suitability are structurally exposed to cross-clade importation (Clade I entered via border states); floor their tier so the ML cannot zero them out."
+    },
+    {
+      "id": "R3",
+      "name": "digital_lead_time",
+      "rationale": "National mpox chatter led NCDC confirmation by 204 days at the 2024 Clade-I emergence; a digital surge corroborates latent risk before it appears in case counts."
+    },
+    {
+      "id": "R4",
+      "name": "spatial_spillover",
+      "rationale": "Neighbour cases in the prior week (IRR=1.022, p<0.001) signal diffusion risk not yet realised locally."
+    },
+    {
+      "id": "R5",
+      "name": "case_momentum",
+      "rationale": "Positive case velocity over a rising 4-week mean indicates incipient exponential growth."
+    }
+  ],
+  "engine_config": {
+    "floor_frac": 0.4,
+    "votes_required": 2,
+    "alert_rule": "prob>=youden OR (prob>=0.4*youden AND corroborating_votes>=2)"
+  },
+  "clade_shift_headline": {
+    "label": "Cross-clade (train<=2023, test=2024 Clade I)",
+    "test_year": 2024,
+    "test_n": 1924,
+    "test_positives": 40,
+    "thresholds": {
+      "youden": 0.6731,
+      "reservoir_p75": 0.2776,
+      "reservoir_p90": 0.461,
+      "digital_surge_threshold": 1.5,
+      "n_surge_weeks": 49
+    },
+    "xgboost_alone": {
+      "sensitivity": 0.025,
+      "false_alarm_rate": 0.0149,
+      "ppv": 0.0345,
+      "tp": 1,
+      "fp": 28,
+      "fn": 39,
+      "tn": 1856
+    },
+    "expert_system": {
+      "sensitivity": 0.2,
+      "false_alarm_rate": 0.0372,
+      "ppv": 0.1026,
+      "tp": 8,
+      "fp": 70,
+      "fn": 32,
+      "tn": 1814
+    },
+    "recovered_outbreaks": 7,
+    "added_false_alarms": 42,
+    "sensitivity_gain": 0.175,
+    "ppv_change": 0.0681
+  },
+  "walk_forward_folds": [
+    {
+      "label": "WF train<=2020, test=2021",
+      "test_year": 2021,
+      "test_n": 1924,
+      "test_positives": 15,
+      "thresholds": {
+        "youden": 0.9947,
+        "reservoir_p75": 0.2776,
+        "reservoir_p90": 0.461,
+        "digital_surge_threshold": 1.0,
+        "n_surge_weeks": 96
+      },
+      "xgboost_alone": {
+        "sensitivity": 0.0,
+        "false_alarm_rate": 0.0,
+        "ppv": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 15,
+        "tn": 1909
+      },
+      "expert_system": {
+        "sensitivity": 0.0,
+        "false_alarm_rate": 0.0,
+        "ppv": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 15,
+        "tn": 1909
+      },
+      "recovered_outbreaks": 0,
+      "added_false_alarms": 0,
+      "sensitivity_gain": 0.0,
+      "ppv_change": 0.0
+    },
+    {
+      "label": "WF train<=2021, test=2022",
+      "test_year": 2022,
+      "test_n": 1924,
+      "test_positives": 263,
+      "thresholds": {
+        "youden": 0.9835,
+        "reservoir_p75": 0.2776,
+        "reservoir_p90": 0.461,
+        "digital_surge_threshold": 1.0,
+        "n_surge_weeks": 96
+      },
+      "xgboost_alone": {
+        "sensitivity": 0.0,
+        "false_alarm_rate": 0.0006,
+        "ppv": 0.0,
+        "tp": 0,
+        "fp": 1,
+        "fn": 263,
+        "tn": 1660
+      },
+      "expert_system": {
+        "sensitivity": 0.0114,
+        "false_alarm_rate": 0.0042,
+        "ppv": 0.3,
+        "tp": 3,
+        "fp": 7,
+        "fn": 260,
+        "tn": 1654
+      },
+      "recovered_outbreaks": 3,
+      "added_false_alarms": 6,
+      "sensitivity_gain": 0.0114,
+      "ppv_change": 0.3
+    },
+    {
+      "label": "WF train<=2022, test=2023",
+      "test_year": 2023,
+      "test_n": 1924,
+      "test_positives": 187,
+      "thresholds": {
+        "youden": 0.8124,
+        "reservoir_p75": 0.2776,
+        "reservoir_p90": 0.461,
+        "digital_surge_threshold": 3.25,
+        "n_surge_weeks": 24
+      },
+      "xgboost_alone": {
+        "sensitivity": 0.1818,
+        "false_alarm_rate": 0.0271,
+        "ppv": 0.4198,
+        "tp": 34,
+        "fp": 47,
+        "fn": 153,
+        "tn": 1690
+      },
+      "expert_system": {
+        "sensitivity": 0.2353,
+        "false_alarm_rate": 0.038,
+        "ppv": 0.4,
+        "tp": 44,
+        "fp": 66,
+        "fn": 143,
+        "tn": 1671
+      },
+      "recovered_outbreaks": 10,
+      "added_false_alarms": 19,
+      "sensitivity_gain": 0.0535,
+      "ppv_change": -0.0198
+    }
+  ],
+  "walk_forward_summary": {
+    "xgboost_alone": {
+      "sensitivity": 0.0606,
+      "false_alarm_rate": 0.0092,
+      "ppv": 0.1399
+    },
+    "expert_system": {
+      "sensitivity": 0.0822,
+      "false_alarm_rate": 0.0141,
+      "ppv": 0.2333
+    },
+    "mean_recovered_outbreaks": 4.33,
+    "mean_sensitivity_gain": 0.0216
+  }
+}

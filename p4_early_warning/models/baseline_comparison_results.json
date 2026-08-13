@@ -1,0 +1,186 @@
+{
+  "computed_at": "2026-08-13T14:09:59.973008+00:00",
+  "description": "Three complete outbreak-warning systems benchmarked on identical folds and the target_outbreak_4w target. ARIMA = current practice (cases only); NB-GLM = statistical baseline (4 streams); SmartMpox = knowledge-based hybrid (5 streams incl. digital surveillance + expert inference layer).",
+  "data_streams": {
+    "arima": "case counts (1)",
+    "nb_glm": "cases + climate + reservoir + spatial (4)",
+    "smartmpox": "cases + climate + reservoir + spatial + digital (5)"
+  },
+  "walk_forward_folds": [
+    {
+      "fold": "2020->2021",
+      "test_year": 2021,
+      "test_positives": 15,
+      "arima": {
+        "sensitivity": 0.0,
+        "false_alarm_rate": 0.0,
+        "ppv": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 15,
+        "tn": 1909,
+        "auc": 0.8749,
+        "sens_at_far10": 0.4
+      },
+      "nb_glm": {
+        "sensitivity": 0.1333,
+        "false_alarm_rate": 0.1241,
+        "ppv": 0.0084,
+        "tp": 2,
+        "fp": 237,
+        "fn": 13,
+        "tn": 1672,
+        "auc": 0.5099,
+        "sens_at_far10": 0.0667
+      },
+      "smartmpox": {
+        "sensitivity": 0.0,
+        "false_alarm_rate": 0.0,
+        "ppv": 0.0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 15,
+        "tn": 1909,
+        "auc": 0.7001,
+        "sens_at_far10": 0.3333
+      }
+    },
+    {
+      "fold": "2021->2022",
+      "test_year": 2022,
+      "test_positives": 263,
+      "arima": {
+        "sensitivity": 0.2928,
+        "false_alarm_rate": 0.1102,
+        "ppv": 0.2962,
+        "tp": 77,
+        "fp": 183,
+        "fn": 186,
+        "tn": 1478,
+        "auc": 0.6231,
+        "sens_at_far10": 0.2776
+      },
+      "nb_glm": {
+        "sensitivity": 0.1369,
+        "false_alarm_rate": 0.0897,
+        "ppv": 0.1946,
+        "tp": 36,
+        "fp": 149,
+        "fn": 227,
+        "tn": 1512,
+        "auc": 0.4722,
+        "sens_at_far10": 0.1597
+      },
+      "smartmpox": {
+        "sensitivity": 0.0114,
+        "false_alarm_rate": 0.0042,
+        "ppv": 0.3,
+        "tp": 3,
+        "fp": 7,
+        "fn": 260,
+        "tn": 1654,
+        "auc": 0.7213,
+        "sens_at_far10": 0.3156
+      }
+    },
+    {
+      "fold": "2022->2023",
+      "test_year": 2023,
+      "test_positives": 187,
+      "arima": {
+        "sensitivity": 0.9626,
+        "false_alarm_rate": 0.9004,
+        "ppv": 0.1032,
+        "tp": 180,
+        "fp": 1564,
+        "fn": 7,
+        "tn": 173,
+        "auc": 0.7654,
+        "sens_at_far10": 0.4171
+      },
+      "nb_glm": {
+        "sensitivity": 0.4385,
+        "false_alarm_rate": 0.2619,
+        "ppv": 0.1527,
+        "tp": 82,
+        "fp": 455,
+        "fn": 105,
+        "tn": 1282,
+        "auc": 0.6613,
+        "sens_at_far10": 0.1979
+      },
+      "smartmpox": {
+        "sensitivity": 0.2353,
+        "false_alarm_rate": 0.038,
+        "ppv": 0.4,
+        "tp": 44,
+        "fp": 66,
+        "fn": 143,
+        "tn": 1671,
+        "auc": 0.7342,
+        "sens_at_far10": 0.3797
+      }
+    }
+  ],
+  "walk_forward_summary": {
+    "arima": {
+      "auc": 0.7545,
+      "sensitivity": 0.4185,
+      "false_alarm_rate": 0.3369,
+      "ppv": 0.1331,
+      "sens_at_far10": 0.3649
+    },
+    "nb_glm": {
+      "auc": 0.5478,
+      "sensitivity": 0.2362,
+      "false_alarm_rate": 0.1586,
+      "ppv": 0.1186,
+      "sens_at_far10": 0.1414
+    },
+    "smartmpox": {
+      "auc": 0.7185,
+      "sensitivity": 0.0822,
+      "false_alarm_rate": 0.0141,
+      "ppv": 0.2333,
+      "sens_at_far10": 0.3429
+    }
+  },
+  "cross_clade_2024": {
+    "fold": "2023->2024 Clade I",
+    "test_year": 2024,
+    "test_positives": 40,
+    "arima": {
+      "sensitivity": 0.1,
+      "false_alarm_rate": 0.0817,
+      "ppv": 0.0253,
+      "tp": 4,
+      "fp": 154,
+      "fn": 36,
+      "tn": 1730,
+      "auc": 0.544,
+      "sens_at_far10": 0.15
+    },
+    "nb_glm": {
+      "sensitivity": 0.5,
+      "false_alarm_rate": 0.1789,
+      "ppv": 0.056,
+      "tp": 20,
+      "fp": 337,
+      "fn": 20,
+      "tn": 1547,
+      "auc": 0.8051,
+      "sens_at_far10": 0.325
+    },
+    "smartmpox": {
+      "sensitivity": 0.2,
+      "false_alarm_rate": 0.0372,
+      "ppv": 0.1026,
+      "tp": 8,
+      "fp": 70,
+      "fn": 32,
+      "tn": 1814,
+      "auc": 0.7563,
+      "sens_at_far10": 0.3
+    }
+  }
+}
