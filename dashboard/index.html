@@ -477,12 +477,20 @@ function loadLiveData() {
   return Promise.all([
     sbFetch("latest_risk_scores?select=state_id,epi_year,epi_week,week_start_date,risk_prob,risk_tier,top_feature_1,top_feature_1_shap,top_feature_2,top_feature_3"),
     sbFetch("ref_states?select=state_id,state_name,is_border_state"),
-    sbFetch("surveillance_weekly?select=epi_year,confirmed,suspected,probable&order=epi_year.asc")
+    sbFetch("surveillance_weekly?select=epi_year,confirmed,suspected,probable&order=epi_year.asc"),
+    sbFetch("latest_expert_scores?select=state_id,risk_tier,expert_reason").catch(function(){ return []; })
   ]).then(function(results) {
-    var scores = results[0], states = results[1], surv = results[2];
+    var scores = results[0], states = results[1], surv = results[2], expert = results[3]||[];
+    var expertMap = {};
+    expert.forEach(function(e){ expertMap[e.state_id] = e; });
     var stateMap = {};
     states.forEach(function(s){ stateMap[s.state_id] = {name:s.state_name, border:s.is_border_state}; });
-    scores.forEach(function(s){ s.state_name = (stateMap[s.state_id]||{}).name || "State "+s.state_id; });
+    scores.forEach(function(s){
+      s.state_name = (stateMap[s.state_id]||{}).name || "State "+s.state_id;
+      var ex = expertMap[s.state_id];
+      s.expert_tier = ex ? ex.risk_tier : s.risk_tier;
+      s.expert_reason = ex ? ex.expert_reason : null;
+    });
     var annualMap = {};
     surv.forEach(function(r){
       var y = r.epi_year;
@@ -501,8 +509,8 @@ function loadLiveData() {
 // ── KPI Tiles ───────────────────────────────────────────────────
 function renderKPI() {
   var scores = DATA.latest_scores || [];
-  var critical = scores.filter(function(s){ return s.risk_tier==="critical"; }).length;
-  var highRisk = scores.filter(function(s){ return s.risk_tier==="critical"||s.risk_tier==="red"; }).length;
+  var critical = scores.filter(function(s){ return (s.expert_tier||s.risk_tier)==="critical"; }).length;
+  var highRisk = scores.filter(function(s){ var t=s.expert_tier||s.risk_tier; return t==="critical"||t==="red"; }).length;
   var bt = DATA.backtest || {};
   var meanAUC = bt.mean_roc_auc ? bt.mean_roc_auc.toFixed(3) : "0.727";
   var folds = (bt.folds||[]).filter(function(f){ return f.roc_auc !== null && f.roc_auc !== undefined; });
@@ -520,21 +528,42 @@ function kpiCard(cls,lbl,val,sub){
     +'<div class="kpi-sub">'+sub+'</div></div>';
 }
 
+// ── Expert-layer helpers (knowledge-based tier escalation) ──────
+var REASON_FULL = {reservoir:"reservoir ecology", border:"border paradox",
+  digital:"digital lead-time", spatial:"spatial spillover", momentum:"case momentum"};
+function expandReason(r){
+  if(!r) return "";
+  return r.split(", ").map(function(t){ return REASON_FULL[t]||t; }).join(", ");
+}
+function tierCellHTML(s){
+  var xt=s.risk_tier, et=s.expert_tier||xt;
+  if(et!==xt){
+    return "<span class='tier-badge tier-"+xt+"'>"+xt+"</span>"
+      +"<span style='color:var(--text-4);margin:0 4px'>&rarr;</span>"
+      +"<span class='tier-badge tier-"+et+"'>"+et+"</span>";
+  }
+  return "<span class='tier-badge tier-"+xt+"'>"+xt+"</span>";
+}
+
 // ── Alert Table ─────────────────────────────────────────────────
 function renderAlertTable() {
   var scores = (DATA.latest_scores||[]).slice().sort(function(a,b){ return b.risk_prob-a.risk_prob; });
   document.getElementById("alert-tbody").innerHTML = scores.map(function(s,i){
     var pct = (s.risk_prob*100).toFixed(1);
     var feat = s.top_feature_1 ? s.top_feature_1.replace(/_/g," ") : "";
-    var col = (document.documentElement.dataset.theme==="light"?TIER_HEX_LIGHT:TIER_HEX_DARK)[s.risk_tier]||"#666";
+    var escalated = s.expert_tier && s.expert_tier!==s.risk_tier;
+    var drv = (escalated && s.expert_reason)
+      ? "<span style='color:var(--tier-red,#e0662b)'>&uarr; expert: "+expandReason(s.expert_reason)+"</span>"
+      : feat;
+    var col = (document.documentElement.dataset.theme==="light"?TIER_HEX_LIGHT:TIER_HEX_DARK)[s.expert_tier||s.risk_tier]||"#666";
     return "<tr>"
       +"<td style='color:var(--text-4);font-size:11px;font-variant-numeric:tabular-nums'>"+(i+1)+"</td>"
       +"<td><strong>"+s.state_name+"</strong></td>"
-      +"<td><span class='tier-badge tier-"+s.risk_tier+"'>"+s.risk_tier+"</span></td>"
+      +"<td>"+tierCellHTML(s)+"</td>"
       +"<td>"
         +"<div style='font-variant-numeric:tabular-nums;font-size:12px;font-weight:600'>"+pct+"%</div>"
         +"<div class='prob-bar-wrap'><div class='prob-bar' style='width:"+Math.min(pct,100)+"%;background:"+col+"'></div></div>"
-        +"<div style='font-size:10px;color:var(--text-4);margin-top:3px'>"+feat+"</div>"
+        +"<div style='font-size:10px;color:var(--text-4);margin-top:3px'>"+drv+"</div>"
       +"</td></tr>";
   }).join("");
 }
@@ -561,7 +590,7 @@ function renderMap() {
     if (!s) return;
     var lon = CENTROIDS[sid][0], lat = CENTROIDS[sid][1];
     var x = px(lon), y = py(lat);
-    var col = HEX[s.risk_tier] || "#666";
+    var col = HEX[s.expert_tier||s.risk_tier] || "#666";
     var r = 13 + s.risk_prob * 8;
     var name = s.state_name || "State "+id;
     var abbr = name.length > 7 ? name.substring(0,6) : name;
@@ -592,8 +621,13 @@ function showTT(e, sid) {
   var feat = s.top_feature_1 ? s.top_feature_1.replace(/_/g," ") : "—";
   var shap = s.top_feature_1_shap ? parseFloat(s.top_feature_1_shap).toFixed(3) : "";
   var tt = document.getElementById("tooltip");
+  var escalated = s.expert_tier && s.expert_tier!==s.risk_tier;
   tt.innerHTML = "<div class='tt-name'>"+s.state_name+"</div>"
-    +"<div class='tt-row'><span>Tier</span><span class='tt-value'><span class='tier-badge tier-"+s.risk_tier+"'>"+s.risk_tier+"</span></span></div>"
+    +"<div class='tt-row'><span>ML tier</span><span class='tt-value'><span class='tier-badge tier-"+s.risk_tier+"'>"+s.risk_tier+"</span></span></div>"
+    +(escalated
+       ? "<div class='tt-row'><span>Expert tier</span><span class='tt-value'><span class='tier-badge tier-"+s.expert_tier+"'>"+s.expert_tier+"</span></span></div>"
+         +"<div class='tt-row'><span>Escalated by</span><span class='tt-value'>"+expandReason(s.expert_reason)+"</span></div>"
+       : "")
     +"<div class='tt-row'><span>P(outbreak 4w)</span><span class='tt-value'>"+pct+"%</span></div>"
     +(feat?"<div class='tt-row'><span>Top driver</span><span class='tt-value'>"+feat+"</span></div>":"")
     +(shap?"<div class='tt-row'><span>SHAP</span><span class='tt-value'>"+shap+"</span></div>":"")

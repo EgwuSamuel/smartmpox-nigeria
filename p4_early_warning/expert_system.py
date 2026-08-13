@@ -42,6 +42,17 @@ FEATURE_COLS = [
 ]
 TARGET = "target_outbreak_4w"
 
+# Deployed tier thresholds (must match generate_risk_scores.py) and ordering
+TIER_ORDER = ["green", "amber", "red", "critical"]
+TIER_THRESHOLDS = {"critical": 0.3452, "red": 0.20, "amber": 0.08}
+
+
+def base_tier(prob: float) -> str:
+    if prob >= TIER_THRESHOLDS["critical"]: return "critical"
+    if prob >= TIER_THRESHOLDS["red"]:      return "red"
+    if prob >= TIER_THRESHOLDS["amber"]:    return "amber"
+    return "green"
+
 
 # ───────────────────────────── data loading ──────────────────────────────────
 def get_conn():
@@ -209,6 +220,39 @@ class ExpertInferenceEngine:
             "n_votes":      int(n_votes),
             "rules_fired":  fired,
         }
+
+    # Compact labels for the knowledge base (fit the 50-char reason column;
+    # the dashboard expands them for display).
+    RULE_LABELS = {"R1": "reservoir", "R2": "border", "R3": "digital",
+                   "R4": "spatial", "R5": "momentum"}
+
+    def infer_tier(self, row, prob, stored_base_tier=None) -> dict:
+        """
+        Deployed tier decision: escalate the base risk tier when codified domain
+        knowledge corroborates latent risk. Returns adjusted tier + why.
+          * Corroboration (>=votes_required factors, with a floor ML signal) → +1 tier.
+          * Border-paradox hard rule (R2) → floor the tier at 'amber' (never green).
+        """
+        factors = self._factors(row)
+        votes   = sum(factors.values())
+        base    = stored_base_tier or base_tier(prob)
+        idx     = TIER_ORDER.index(base)
+        reasons = []
+
+        if prob >= self.floor_frac * self.youden and votes >= self.votes_required:
+            idx = min(idx + 1, len(TIER_ORDER) - 1)
+            reasons += [self.RULE_LABELS[r] for r, on in factors.items() if on]
+
+        if factors["R2"] and idx < TIER_ORDER.index("amber"):
+            idx = TIER_ORDER.index("amber")
+            if self.RULE_LABELS["R2"] not in reasons:
+                reasons.append(self.RULE_LABELS["R2"])
+
+        new_tier = TIER_ORDER[idx]
+        escalated = new_tier != base
+        return {"base_tier": base, "expert_tier": new_tier,
+                "escalated": escalated,
+                "reason": ", ".join(dict.fromkeys(reasons)) if escalated else None}
 
     def infer_frame(self, df: pd.DataFrame, probs: np.ndarray) -> pd.DataFrame:
         out = df.copy()
