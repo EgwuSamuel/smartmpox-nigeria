@@ -1,0 +1,344 @@
+{
+  "computed_at": "2026-08-13T14:51:54.148031+00:00",
+  "method": "Simulated real-time (forward-chaining) validation: system frozen on <=2023, replayed weekly through 2024 with no look-ahead. Not a live real-time deployment.",
+  "ncdc_national_first_confirmation": "2024-08-19",
+  "channel_a_digital": {
+    "frozen_surge_threshold": 1.5,
+    "by_threshold": [
+      {
+        "threshold_posts_per_week": 1,
+        "is_frozen_operating_point": false,
+        "first_alert_week": 4,
+        "first_alert_date": "2024-01-22",
+        "lead_days_vs_ncdc": 210
+      },
+      {
+        "threshold_posts_per_week": 2,
+        "is_frozen_operating_point": true,
+        "first_alert_week": 32,
+        "first_alert_date": "2024-08-05",
+        "lead_days_vs_ncdc": 14
+      },
+      {
+        "threshold_posts_per_week": 2,
+        "is_frozen_operating_point": true,
+        "first_alert_week": 32,
+        "first_alert_date": "2024-08-05",
+        "lead_days_vs_ncdc": 14
+      },
+      {
+        "threshold_posts_per_week": 8,
+        "is_frozen_operating_point": false,
+        "first_alert_week": 32,
+        "first_alert_date": "2024-08-05",
+        "lead_days_vs_ncdc": 14
+      }
+    ],
+    "weekly_counts_2024": {
+      "4": 1,
+      "13": 1,
+      "17": 1,
+      "20": 1,
+      "26": 1,
+      "28": 1,
+      "29": 1,
+      "31": 1,
+      "32": 15,
+      "33": 54,
+      "34": 18,
+      "35": 34,
+      "36": 7,
+      "37": 7,
+      "38": 3,
+      "39": 5,
+      "40": 2,
+      "41": 5,
+      "42": 3,
+      "43": 2,
+      "44": 3,
+      "45": 1,
+      "46": 1,
+      "47": 5,
+      "48": 1,
+      "49": 2,
+      "51": 2,
+      "52": 1
+    }
+  },
+  "channel_b_model_expert": {
+    "engine_thresholds": {
+      "youden": 0.6731,
+      "reservoir_p75": 0.2776,
+      "reservoir_p90": 0.461,
+      "digital_surge_threshold": 1.5,
+      "n_surge_weeks": 49
+    },
+    "n_confirmed_states": 20,
+    "national_confirmation_week": 34,
+    "deployed_threshold": {
+      "threshold": "deployed tiers (red>=0.20)",
+      "distinct_states_alerted_pre_confirmation": 28,
+      "of_total_states": 37,
+      "pre_confirmation_alert_rate": 0.0704,
+      "n_confirmed_states_alerted_before": 17,
+      "per_state": [
+        {
+          "state_id": 29,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 21,
+          "lead_weeks": 13
+        },
+        {
+          "state_id": 14,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 1,
+          "lead_weeks": 33
+        },
+        {
+          "state_id": 9,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 21,
+          "lead_weeks": 13
+        },
+        {
+          "state_id": 6,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 21,
+          "lead_weeks": 13
+        },
+        {
+          "state_id": 12,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 21,
+          "lead_weeks": 13
+        },
+        {
+          "state_id": 31,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 37,
+          "lead_weeks": -1
+        },
+        {
+          "state_id": 3,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 16,
+          "lead_weeks": 20
+        },
+        {
+          "state_id": 37,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 1,
+          "lead_weeks": 35
+        },
+        {
+          "state_id": 7,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 23,
+          "lead_weeks": 13
+        },
+        {
+          "state_id": 10,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 21,
+          "lead_weeks": 15
+        },
+        {
+          "state_id": 15,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 42,
+          "lead_weeks": -6
+        },
+        {
+          "state_id": 16,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 21,
+          "lead_weeks": 15
+        },
+        {
+          "state_id": 24,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 1,
+          "lead_weeks": 35
+        },
+        {
+          "state_id": 20,
+          "ncdc_confirm_week": 39,
+          "ml_alert_week": null,
+          "lead_weeks": null
+        },
+        {
+          "state_id": 1,
+          "ncdc_confirm_week": 41,
+          "ml_alert_week": 21,
+          "lead_weeks": 20
+        },
+        {
+          "state_id": 5,
+          "ncdc_confirm_week": 41,
+          "ml_alert_week": 23,
+          "lead_weeks": 18
+        },
+        {
+          "state_id": 30,
+          "ncdc_confirm_week": 42,
+          "ml_alert_week": 21,
+          "lead_weeks": 21
+        },
+        {
+          "state_id": 28,
+          "ncdc_confirm_week": 42,
+          "ml_alert_week": 16,
+          "lead_weeks": 26
+        },
+        {
+          "state_id": 27,
+          "ncdc_confirm_week": 42,
+          "ml_alert_week": 1,
+          "lead_weeks": 41
+        },
+        {
+          "state_id": 32,
+          "ncdc_confirm_week": 44,
+          "ml_alert_week": 21,
+          "lead_weeks": 23
+        }
+      ]
+    },
+    "calibrated_threshold": {
+      "threshold": "calibrated Youden (>=0.673)",
+      "distinct_states_alerted_pre_confirmation": 10,
+      "of_total_states": 37,
+      "pre_confirmation_alert_rate": 0.0139,
+      "n_confirmed_states_alerted_before": 10,
+      "per_state": [
+        {
+          "state_id": 29,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": null,
+          "lead_weeks": null
+        },
+        {
+          "state_id": 14,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 1,
+          "lead_weeks": 33
+        },
+        {
+          "state_id": 9,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 21,
+          "lead_weeks": 13
+        },
+        {
+          "state_id": 6,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 35,
+          "lead_weeks": -1
+        },
+        {
+          "state_id": 12,
+          "ncdc_confirm_week": 34,
+          "ml_alert_week": 44,
+          "lead_weeks": -10
+        },
+        {
+          "state_id": 31,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 43,
+          "lead_weeks": -7
+        },
+        {
+          "state_id": 3,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 22,
+          "lead_weeks": 14
+        },
+        {
+          "state_id": 37,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": null,
+          "lead_weeks": null
+        },
+        {
+          "state_id": 7,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": null,
+          "lead_weeks": null
+        },
+        {
+          "state_id": 10,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 22,
+          "lead_weeks": 14
+        },
+        {
+          "state_id": 15,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": null,
+          "lead_weeks": null
+        },
+        {
+          "state_id": 16,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 22,
+          "lead_weeks": 14
+        },
+        {
+          "state_id": 24,
+          "ncdc_confirm_week": 36,
+          "ml_alert_week": 39,
+          "lead_weeks": -3
+        },
+        {
+          "state_id": 20,
+          "ncdc_confirm_week": 39,
+          "ml_alert_week": null,
+          "lead_weeks": null
+        },
+        {
+          "state_id": 1,
+          "ncdc_confirm_week": 41,
+          "ml_alert_week": null,
+          "lead_weeks": null
+        },
+        {
+          "state_id": 5,
+          "ncdc_confirm_week": 41,
+          "ml_alert_week": 23,
+          "lead_weeks": 18
+        },
+        {
+          "state_id": 30,
+          "ncdc_confirm_week": 42,
+          "ml_alert_week": 21,
+          "lead_weeks": 21
+        },
+        {
+          "state_id": 28,
+          "ncdc_confirm_week": 42,
+          "ml_alert_week": 23,
+          "lead_weeks": 19
+        },
+        {
+          "state_id": 27,
+          "ncdc_confirm_week": 42,
+          "ml_alert_week": 1,
+          "lead_weeks": 41
+        },
+        {
+          "state_id": 32,
+          "ncdc_confirm_week": 44,
+          "ml_alert_week": 43,
+          "lead_weeks": 1
+        }
+      ]
+    },
+    "note": "A high 'alerted before confirmation' count under the lenient deployed tiers is a NON-SPECIFIC standing prior, not detection: the same threshold alarms most states all year. The calibrated Youden threshold shows the genuine (near-zero) prospective skill of a Clade-II-trained case model against Clade I."
+  },
+  "honest_summary": {
+    "digital_lead_days_frozen_threshold": 14,
+    "digital_lead_days_any_mention_threshold1": 210,
+    "ml_prospective_skill_calibrated": "10/20 confirmed states genuinely pre-empted at the calibrated threshold",
+    "interpretation": "Prospective lead comes essentially entirely from the digital channel. The long headline lead depends on a single early mention (threshold=1), which is NOT an operational alert; at the deployable frozen surge threshold the lead is ~2 weeks but robust. The case-based ML offers little genuine prospective skill against a novel clade (its lenient-threshold 'pre-emption' is a non-specific standing prior). Report both honestly."
+  }
+}

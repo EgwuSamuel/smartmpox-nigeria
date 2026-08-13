@@ -94,10 +94,11 @@ def load_national_digital_signal(train_max_year: int) -> tuple[set, float]:
     Build a NATIONAL weekly mpox-chatter surge indicator from the P3 scanner.
 
     Rationale: only 8/343 mpox-relevant posts carry a state_id, so the digital
-    signal is honestly a national-resolution early-warning corroborator (it is
-    the 204-day Clade-I lead-time signal). A week is a 'surge' week if its
-    mpox-relevant post count exceeds the 75th percentile of TRAINING-period
-    weekly counts (threshold fitted on train only → no leakage).
+    signal is honestly a national-resolution early-warning corroborator. Forward
+    testing (prospective_validation.py) shows a robust ~2-week lead over NCDC
+    confirmation at this threshold. A week is a 'surge' week if its mpox-relevant
+    post count exceeds the 75th percentile of TRAINING-period weekly counts
+    (threshold fitted on train only → no leakage).
 
     Returns (set_of_surge_(isoyear,isoweek), fitted_threshold).
     """
@@ -170,9 +171,10 @@ class ExpertInferenceEngine:
                       "exposed to cross-clade importation (Clade I entered via border "
                       "states); floor their tier so the ML cannot zero them out."},
         {"id": "R3", "name": "digital_lead_time",
-         "rationale": "National mpox chatter led NCDC confirmation by 204 days at the "
-                      "2024 Clade-I emergence; a digital surge corroborates latent risk "
-                      "before it appears in case counts."},
+         "rationale": "A national mpox-chatter surge gave a forward-tested ~2-week lead "
+                      "over NCDC confirmation at the 2024 Clade-I emergence (the raw "
+                      "first-mention gap was longer but not operationally robust); a digital "
+                      "surge corroborates latent risk before it appears in case counts."},
         {"id": "R4", "name": "spatial_spillover",
          "rationale": "Neighbour cases in the prior week (IRR=1.022, p<0.001) signal "
                       "diffusion risk not yet realised locally."},

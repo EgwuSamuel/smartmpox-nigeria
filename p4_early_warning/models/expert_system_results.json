@@ -1,5 +1,5 @@
 {
-  "computed_at": "2026-08-13T13:57:36.629475+00:00",
+  "computed_at": "2026-08-13T14:58:18.152246+00:00",
   "description": "Knowledge-based expert inference layer fusing XGBoost evidence with codified epidemiological rules. Escalation-only (fail-safe); thresholds fitted on training folds (no leakage).",
   "knowledge_base": [
     {
@@ -15,7 +15,7 @@
     {
       "id": "R3",
       "name": "digital_lead_time",
-      "rationale": "National mpox chatter led NCDC confirmation by 204 days at the 2024 Clade-I emergence; a digital surge corroborates latent risk before it appears in case counts."
+      "rationale": "A national mpox-chatter surge gave a forward-tested ~2-week lead over NCDC confirmation at the 2024 Clade-I emergence (the raw first-mention gap was longer but not operationally robust); a digital surge corroborates latent risk before it appears in case counts."
     },
     {
       "id": "R4",
